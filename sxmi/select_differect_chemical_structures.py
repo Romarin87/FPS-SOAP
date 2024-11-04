@@ -3,6 +3,7 @@ import time
 import logging
 import argparse
 from collections import defaultdict
+from itertools import compress
 
 import numpy as np
 from ase import Atoms
@@ -127,10 +128,12 @@ def compare_and_update_structures(ref_structures, cand_structures, njobs=8, spec
         # 删除 cand_structures 中与 ref_structures 中相似度高于 threshold 的所有结构
         # 更新 soap_cand, cand_structures, max_similarity_values
         old_cand_num = len(cand_structures)
-        soap_cand = [soap_cand[i] for i in range(len(soap_cand)) if round(max_similarity_values[i],5) < threshold]
-        cand_structures = [cand_structures[i] for i in range(len(cand_structures)) if round(max_similarity_values[i],5) < threshold]
-        max_similarity_values = np.array([max_similarity_values[i] 
-                                            for i in range(len(max_similarity_values)) if round(max_similarity_values[i],5) < threshold])
+
+        preserve_condition = max_similarity_values < threshold # 减少不必要的 round(5) 开销
+        soap_cand = list(compress(soap_cand, preserve_condition)) # itertools.compress() 更高效
+        cand_structures = list(compress(cand_structures, preserve_condition))
+        max_similarity_values = max_similarity_values[preserve_condition] # np 布尔索引更高效
+        
         new_cand_num = len(cand_structures)
         logger.info(f"Round {round_num}: Cand structures reduced from {old_cand_num} to {new_cand_num}")
 
@@ -139,7 +142,7 @@ def compare_and_update_structures(ref_structures, cand_structures, njobs=8, spec
             break
 
         # 将 cand_structures 与 ref_structures 中最不相似的结构添加到 ref_structures 中
-        min_max_similarity = np.min([round(i,5) for i in max_similarity_values])
+        min_max_similarity = np.min(max_similarity_values).round(5) # 减少不必要的 round(5) 开销
         min_max_similarity_index = np.argmin(max_similarity_values)
         ref_structures.append(cand_structures[min_max_similarity_index])
         soap_ref.append(soap_cand[min_max_similarity_index])
@@ -283,6 +286,7 @@ def main(ref_file, cand_file, njobs, r_cut, n_max, l_max, threshold):
     total_logger.info(f"There are {formula_num} formulas to process.")
     total_logger.info("---------")
 
+
     for i, formula in enumerate(cand_dict.keys()):
         # 如果 ref_dict 中没有该组，则会返回空列表，程序可以正常运行
         total_logger.info(f"Processing formula {i+1:>}/{formula_num:>}: {formula}")
@@ -293,11 +297,12 @@ def main(ref_file, cand_file, njobs, r_cut, n_max, l_max, threshold):
         logger.info('Log begin')
         logger.info(f"Processing formula: {formula}")
 
-        species=list(set(cand_dict[formula][0].get_chemical_symbols()))
+        # threshold 对于 species 很敏感，这可能是自动匹配 species 后可能出现的问题
+        # species=list(set(cand_dict[formula][0].get_chemical_symbols()))
         updated_structures, updated_soap_list = compare_and_update_structures(ref_dict[formula], 
                                                                             cand_dict[formula], 
                                                                             njobs=njobs,
-                                                                            species=species,
+                                                                            # species=species,
                                                                             r_cut=r_cut,
                                                                             n_max=n_max,
                                                                             l_max=l_max,
