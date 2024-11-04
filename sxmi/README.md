@@ -1,6 +1,9 @@
-Some simple scripts for operating chemical datasets
+# 让我们说中文
+Some simple scripts for operating chemical datasets  
 
-### 1. select_differect_chemical_structures.py 
+---
+
+## 1. select_differect_chemical_structures.py  
 - 脚本简介  
 这是 Sixuan Mi 在 Bowen Li 的指导和代码思想帮助下完成的脚本（当然少不了 GPT 的功劳），它基于 [SOAP](https://singroup.github.io/dscribe/latest/tutorials/descriptors/soap.html#) 描述符 和 [AverageKernel](https://singroup.github.io/dscribe/latest/tutorials/similarity_analysis/kernels.html) 计算判断两个化学结构的相似性，并通过比较 候选XYZ (`--cand`) 与 参考XYZ (`--ref`) 中化学结构的相似性，将 候选XYZ 中的结构逐一加入到 参考XYZ 中，直到相似度低于阈值的点全部被加入 参考XYZ 中为止。这样我们就通过 候选XYZ 更新了 参考XYZ 数据集。
 
@@ -16,5 +19,62 @@ Some simple scripts for operating chemical datasets
 - 简单测试  
 1. 你可以在命令行中运行 `python select_differect_chemical_structures.py --cand test_dataset/rxn0000_all.xyz &` 这是最简单的输入，只写入必须的 `--cand` 参数，表示在默认参数下从 `test_dataset/rxn0000_all.xyz` 中选择出所有相互之间相似程度低于阈值的点，你可以将你的输出文件与 `test_result/1` 中的文件进行对比，二者应该是一致的。
 2. 你可以在命令行中运行 `python select_differect_chemical_structures.py --ref test_dataset/rxn000x.xyz --cand test_dataset/rxn000x_all.xyz --njobs 16 --r_cut 5 --n_max 3 --l_max 3 --threshold 0.99 &` 这是最复杂的输入，所有参数都显式的给出，表示将 `--cand` 中的点与 `--ref` 中的点比较，逐一挑选最不相似的点加入 `--ref` 中，直到相似度低于阈值的点全部被加入 `--ref` 中。你可以将你的输出文件与 `test_result/2` 中的文件进行对比，二者应该是一致的。  
+
+---
   
-2024年10月30日
+## 2. calculate_atomic_pair_distances.py  
+- 脚本简介  
+计算分子中两两原子对之间的距离。  
+
+- 脚本参数  
+&emsp;`--file`&emsp;&emsp;str，输入文件路径，必须填写，格式为 .xyz  
+&emsp;`--ignore`&emsp;&emsp;str，忽略的元素列表，以逗号分隔（例如，H,O），默认是''  
+&emsp;`--only`&emsp;&emsp;str，计算的元素对列表，以逗号分隔（例如，C-C,O-C），默认是''  
+&emsp;`--output`&emsp;&emsp;str，输出 HDF5 文件名，必须填写  
+
+---
+
+## 3. draw_bond_distribution.py
+- 脚本简介  
+绘制分子中两两原子对之间的距离分布图。 
+
+- 脚本参数  
+&emsp;`--files`&emsp;&emsp;list，必须填写，一或多个键长分布文件名的列表  
+&emsp;`--output`&emsp;&emsp;str，必须填写，输出图形的名称  
+&emsp;`--range`&emsp;&emsp;str，默认 '1,5'，以逗号分隔的距离范围（单位：Å），例如 '1,5'  
+
+---
+
+## 4. calculate_coulomb_matrices.py  
+- 脚本简介  
+计算分子的库伦矩阵。  
+
+- 脚本参数  
+&emsp;`--file`&emsp;&emsp;str，必须填写，输入的 .xyz 格式文件  
+&emsp;`--output`&emsp;&emsp;str，必须填写，输出的库仑矩阵文件名（HDF5 格式）  
+&emsp;`--n_jobs`&emsp;&emsp;int，默认 1，计算时使用的并行作业数  
+
+---
+
+## 5. do_clustering.py   
+- 脚本简介  
+基于库伦矩阵，对分子进行降维聚类。  
+
+- 脚本参数  
+&emsp;`--files`&emsp;&emsp;list，必须填写，文件名列表  
+&emsp;`--tsne`&emsp;&emsp;str，默认 None，自定义 t-SNE 参数（例如，"n_components=2,perplexity=30"）  
+&emsp;`--umap`&emsp;&emsp;str，默认 None，自定义 UMAP 参数（例如，"n_components=2,n_neighbors=10"）  
+
+---
+
+## 6. draw_clustering_results.py  
+- 脚本简介  
+绘制分子的降维聚类图。   
+
+- 脚本参数  
+&emsp;`--tsne`&emsp;&emsp;str，与下一参数必须填写一个，t-SNE HDF5 文件路径  
+&emsp;`--umap`&emsp;&emsp;str，与上一参数必须填写一个，UMAP HDF5 文件路径  
+&emsp;`--labels`&emsp;&emsp;str，必须填写，标签 HDF5 文件路径  
+
+
+2024年11月4日

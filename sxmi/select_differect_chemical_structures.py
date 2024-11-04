@@ -286,6 +286,7 @@ def main(ref_file, cand_file, njobs, r_cut, n_max, l_max, threshold):
     total_logger.info(f"There are {formula_num} formulas to process.")
     total_logger.info("---------")
 
+
     for i, formula in enumerate(cand_dict.keys()):
         # 如果 ref_dict 中没有该组，则会返回空列表，程序可以正常运行
         total_logger.info(f"Processing formula {i+1:>}/{formula_num:>}: {formula}")
@@ -297,11 +298,11 @@ def main(ref_file, cand_file, njobs, r_cut, n_max, l_max, threshold):
         logger.info(f"Processing formula: {formula}")
 
         # threshold 对于 species 很敏感，这可能是自动匹配 species 后可能出现的问题
-        species=list(set(cand_dict[formula][0].get_chemical_symbols()))
+        # species=list(set(cand_dict[formula][0].get_chemical_symbols()))
         updated_structures, updated_soap_list = compare_and_update_structures(ref_dict[formula], 
                                                                             cand_dict[formula], 
                                                                             njobs=njobs,
-                                                                            species=species,
+                                                                            # species=species,
                                                                             r_cut=r_cut,
                                                                             n_max=n_max,
                                                                             l_max=l_max,
