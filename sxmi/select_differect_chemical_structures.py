@@ -489,7 +489,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Select different chemical structures.')
     parser.add_argument('--ref', type=str, default='', help='Reference XYZ file')
     parser.add_argument('--cand', type=str, required=True, help='Candidate XYZ file')
-    parser.add_argument('--njobs', type=int, default=8, help='Number of jobs for CPU parallel processing')
+    parser.add_argument('--njobs', type=int, default=1, help='Number of jobs for CPU parallel processing')
     parser.add_argument('--gpu', type=int, default=1, help='Number of GPUs for GPU parallel processing')
     parser.add_argument('--batch_size', type=int, default=50, help='Batch size for GPU parallel processing')
     parser.add_argument('--r_cut', type=float, default=10.0, help='Cutoff radius for soap descriptor')
