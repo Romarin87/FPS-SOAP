@@ -1,0 +1,12 @@
+2024-12-28 18:33:40,778 - INFO - Total Log begin
+2024-12-28 18:33:40,811 - INFO - There are 1 formulas to process.
+2024-12-28 18:33:40,811 - INFO - Species: ['O', 'H', 'C', 'N']
+2024-12-28 18:33:40,811 - INFO - ---------
+2024-12-28 18:33:40,811 - INFO - Processing formula 1/1: C2H3N3O
+2024-12-28 18:33:40,811 - INFO - Start Ref structures: 0, Cand structures: 100
+2024-12-28 18:33:42,651 - INFO - End Ref structures: 8
+2024-12-28 18:33:42,651 - INFO - Done! Total time elapsed: 1.84 seconds
+2024-12-28 18:33:42,651 - INFO - ---------
+2024-12-28 18:33:42,651 - INFO - All reactions processed successfully!
+2024-12-28 18:33:42,651 - INFO - Total processing time: 1.87 seconds
+2024-12-28 18:33:42,651 - INFO - Total Log end

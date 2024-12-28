@@ -283,6 +283,9 @@ def compare_and_update_structures(ref_structures, cand_structures, njobs=4, gpu=
         min_max_similarity_index = torch.argmin(max_similarity_values).item()
         ref_structures.append(cand_structures[min_max_similarity_index])
         soap_ref.append(soap_cand[min_max_similarity_index])
+
+        # print(soap_ref_self)
+        # print(soap_cand_self[min_max_similarity_index].unsqueeze(0))
         soap_ref_self = torch.cat((soap_ref_self, soap_cand_self[min_max_similarity_index].unsqueeze(0)))
 
         logger.info(f"Round {round_num}: Added structure with min max similarity {min_max_similarity:.5f}.")
