@@ -1,0 +1,25 @@
+2024-10-30 17:00:22,048 - INFO - Log begin
+2024-10-30 17:00:22,048 - INFO - Processing formula: C2H3N3O
+2024-10-30 17:00:22,048 - INFO - njobs: 8, species: ['O', 'C', 'H', 'N'], r_cut: 10.0, n_max: 6, l_max: 4, threshold: 0.9
+2024-10-30 17:00:22,050 - INFO - SOAP descriptors computed in 0.00 seconds
+2024-10-30 17:00:23,165 - INFO - SOAP descriptors computed in 1.11 seconds
+2024-10-30 17:00:23,165 - INFO - Ref structure is empty, add the first Cand structure to Ref structure
+2024-10-30 17:00:23,387 - INFO - Round 1: Similarity computation completed in 0.22 seconds
+2024-10-30 17:00:23,395 - INFO - Round 1: Cand structures reduced from 794 to 595
+2024-10-30 17:00:23,396 - INFO - Round 1: Added structure with min max similarity 0.80644.
+2024-10-30 17:00:23,397 - INFO - Ref structures: 2, Cand structures: 595
+2024-10-30 17:00:23,397 - INFO - ---------
+2024-10-30 17:00:23,606 - INFO - Round 2: Similarity computation completed in 0.21 seconds
+2024-10-30 17:00:23,612 - INFO - Round 2: Cand structures reduced from 595 to 188
+2024-10-30 17:00:23,612 - INFO - Round 2: Added structure with min max similarity 0.86856.
+2024-10-30 17:00:23,613 - INFO - Ref structures: 3, Cand structures: 188
+2024-10-30 17:00:23,613 - INFO - ---------
+2024-10-30 17:00:23,675 - INFO - Round 3: Similarity computation completed in 0.06 seconds
+2024-10-30 17:00:23,677 - INFO - Round 3: Cand structures reduced from 188 to 0
+2024-10-30 17:00:23,677 - INFO - No structures remaining in candidate list.
+2024-10-30 17:00:23,677 - INFO - Ref structures: 3, Cand structures: 0
+2024-10-30 17:00:23,677 - INFO - ---------
+2024-10-30 17:00:23,678 - INFO - Updated reference structures saved to 'C2H3N3O/updated_ref_structures_C2H3N3O.xyz'
+2024-10-30 17:00:23,682 - INFO - SOAP descriptors saved to 'C2H3N3O/updated_ref_soap_descriptors_C2H3N3O.h5'
+2024-10-30 17:00:23,682 - INFO - Done! Total time elapsed: 1.63 seconds
+2024-10-30 17:00:23,682 - INFO - Log end
