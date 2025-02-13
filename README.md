@@ -1,9 +1,9 @@
-# 让我们说中文
+# bwli 第二篇文章的一些脚本
 Some simple scripts for operating chemical datasets  
 
 ---
 
-## 1. select_differect_chemical_structures.py  
+## 1. select_differect_chemical_structures_gpu.py  
 - 脚本简介  
 该脚本可以从一个数据集中根据几何坐标挑选出相似度低于给定阈值的所有结构，从而进行数据的精简。
 此处脚本这是在原先并行 CPU 脚本上进行修改，目前支持 单GPU 运行与 单/多CPU 运行，在 GPU 运行速度明显快于原 24核CPU 的速度，单CPU 运行也远快于原脚本，但 多CPU 运行时可能会出现内存泄漏问题。
@@ -29,8 +29,8 @@ Some simple scripts for operating chemical datasets
 同上，但没有 &emsp;`--gpu`&emsp; 与 &emsp;`--batch_size`&emsp;，且 &emsp;`--njobs`&emsp; 默认为 8
 
 - 简单测试  
-1. 你可以在命令行中运行 `python select_differect_chemical_structures.py --cand test_dataset/rxn0000_all.xyz &` 这是最简单的输入，只写入必须的 `--cand` 参数，表示在默认参数下从 `test_dataset/rxn0000_all.xyz` 中选择出所有相互之间相似程度低于阈值的点，你可以将你的输出文件与 `test_result/1` 中的文件进行对比，二者应该是一致的。
-2. 你可以在命令行中运行 `python select_differect_chemical_structures.py --ref test_dataset/rxn000x.xyz --cand test_dataset/rxn000x_all.xyz --njobs 16 --r_cut 5 --n_max 3 --l_max 3 --threshold 0.99 &` 这是最复杂的输入，所有参数都显式的给出，表示将 `--cand` 中的点与 `--ref` 中的点比较，逐一挑选最不相似的点加入 `--ref` 中，直到相似度低于阈值的点全部被加入 `--ref` 中。你可以将你的输出文件与 `test_result/2` 中的文件进行对比，二者应该是一致的。  
+1. 你可以在命令行中运行 `python select_differect_chemical_structures.py --cand tests/test_dataset/rxn0000_all.xyz &` 这是最简单的输入，只写入必须的 `--cand` 参数，表示在默认参数下从 `test_dataset/rxn0000_all.xyz` 中选择出所有相互之间相似程度低于阈值的点，你可以将你的输出文件与 `tests/test_result/test_1` 中的文件进行对比，二者应该是一致的。
+2. 你可以在命令行中运行 `python select_differect_chemical_structures.py --ref tests/test_dataset/rxn000x.xyz --cand test_dataset/rxn000x_all.xyz --njobs 16 --r_cut 5 --n_max 3 --l_max 3 --threshold 0.99 &` 这是最复杂的输入，所有参数都显式的给出，表示将 `--cand` 中的点与 `--ref` 中的点比较，逐一挑选最不相似的点加入 `--ref` 中，直到相似度低于阈值的点全部被加入 `--ref` 中。你可以将你的输出文件与 `tests/test_result/test_2` 中的文件进行对比，二者应该是一致的。  
 
 ---
   
@@ -89,4 +89,4 @@ Some simple scripts for operating chemical datasets
 &emsp;`--labels`&emsp;&emsp;str，必须填写，标签 HDF5 文件路径  
 
 
-2024年12月28日
+2025年2月12日
