@@ -1,4 +1,5 @@
-# bwli 第二篇文章的一些脚本
+# General reactive machine learning potentials for CHON elements
+
 Some simple scripts for operating chemical datasets  
 
 ---
