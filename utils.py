@@ -106,7 +106,7 @@ def defaultdict_profiler(soap_data):
     print("---------")
 
 # 设置总的日志记录
-def setup_total_logging():
+def setup_total_logging(path):
     '''
     Setup the total logging for the algorithm.
     '''
@@ -117,16 +117,18 @@ def setup_total_logging():
     # 清除之前的处理器，确保每次都干净
     for handler in total_logger.handlers[:]:
         total_logger.removeHandler(handler)
+    
+    os.makedirs(path, exist_ok=True)
 
     # 创建文件处理器
-    file_handler = logging.FileHandler("total_output.log", mode='w')
+    file_handler = logging.FileHandler(os.path.join(path, "total_output.log"), mode='w')
     file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
     total_logger.addHandler(file_handler)
 
     return total_logger
     
 # 设置各化学式的日志记录
-def setup_logging(reaction_formula):
+def setup_logging(reaction_formula, path):
     '''
     Setup the logging for each chemical formula.
     '''
@@ -139,10 +141,11 @@ def setup_logging(reaction_formula):
         logger.removeHandler(handler)
 
     # 创建文件夹
-    os.makedirs(reaction_formula, exist_ok=True)
+    formula_path = os.path.join(path, reaction_formula)
+    os.makedirs(formula_path, exist_ok=True)
 
     # 创建文件处理器
-    file_handler = logging.FileHandler(os.path.join(reaction_formula, f"{reaction_formula}_output.log"), mode='w')
+    file_handler = logging.FileHandler(os.path.join(formula_path, f"{reaction_formula}_output.log"), mode='w')
     file_handler.setFormatter(logging.Formatter('%(asctime)s - %(levelname)s - %(message)s'))
     
     # 添加处理器到 Logger
