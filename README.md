@@ -1,5 +1,4 @@
 # General reactive machine learning potentials for CHON elements
-
 Some simple scripts for operating chemical datasets  
 
 ---
@@ -22,16 +21,20 @@ Some simple scripts for operating chemical datasets
 
 ---
 
-## 2. select_differect_chemical_structures_cpu.py  
+## 2. fps_cpu_numpy.py  
 - 脚本简介  
-原先并行 CPU 脚本，它基于 [SOAP](https://singroup.github.io/dscribe/latest/tutorials/descriptors/soap.html#) 描述符 和 [AverageKernel](https://singroup.github.io/dscribe/latest/tutorials/similarity_analysis/kernels.html) 计算判断两个化学结构的相似性，并通过比较 候选XYZ (`--cand`) 与 参考XYZ (`--ref`) 中化学结构的相似性，将 候选XYZ 中的结构逐一加入到 参考XYZ 中，直到相似度低于阈值的点全部被加入 参考XYZ 中为止。这样我们就通过 候选XYZ 更新了 参考XYZ 数据集。
+修改原先 select_differect_chemical_structures_cpu.py 版本，避免的嵌套并行陷阱，仍旧基于 [SOAP](https://singroup.github.io/dscribe/latest/tutorials/descriptors/soap.html#) 描述符 和 [AverageKernel](https://singroup.github.io/dscribe/latest/tutorials/similarity_analysis/kernels.html) 计算判断两个化学结构的相似性，并通过比较 候选XYZ (`--cand`) 与 参考XYZ (`--ref`) 中化学结构的相似性，将 候选XYZ 中的结构逐一加入到 参考XYZ 中，直到相似度低于阈值的点全部被加入 参考XYZ 中为止。这样我们就通过 候选XYZ 更新了 参考XYZ 数据集。
 
-- 脚本参数  
-同上，但没有 &emsp;`--gpu`&emsp; 与 &emsp;`--batch_size`&emsp;，且 &emsp;`--njobs`&emsp; 默认为 8
+- 脚本参数
+基本同上，修改如下：  
+删除: &emsp;`--gpu`&emsp;  
+修改: &emsp;`--njobs`&emsp; 为 &emsp;`--n_jobs`&emsp;，默认为 None 表示启用所有 cpu;  
+增加: &emsp;`--save_soap`&emsp; 可选保存或不保存计算得到的描述符，实际计算描述符速度很快，但文件较大，因此默认不保存  
+增加: &emsp;`--save_dir`&emsp; 可选保存输出结果的位置，默认创建新文件夹 fps_results，并创建当前任务 yyyy-mm-dd-hh-mm-ss/formula(s) 文件夹保存  
 
 - 简单测试  
-1. 你可以在命令行中运行 `python select_differect_chemical_structures.py --cand tests/test_dataset/rxn0000_all.xyz &` 这是最简单的输入，只写入必须的 `--cand` 参数，表示在默认参数下从 `test_dataset/rxn0000_all.xyz` 中选择出所有相互之间相似程度低于阈值的点，你可以将你的输出文件与 `tests/test_result/test_1` 中的文件进行对比，二者应该是一致的。
-2. 你可以在命令行中运行 `python select_differect_chemical_structures.py --ref tests/test_dataset/rxn000x.xyz --cand test_dataset/rxn000x_all.xyz --njobs 16 --r_cut 5 --n_max 3 --l_max 3 --threshold 0.99 &` 这是最复杂的输入，所有参数都显式的给出，表示将 `--cand` 中的点与 `--ref` 中的点比较，逐一挑选最不相似的点加入 `--ref` 中，直到相似度低于阈值的点全部被加入 `--ref` 中。你可以将你的输出文件与 `tests/test_result/test_2` 中的文件进行对比，二者应该是一致的。  
+1. 你可以在命令行中运行 `python fps_cpu_numpy.py --cand tests/test_dataset/rxn0000_all.xyz &` 这是最简单的输入，只写入必须的 `--cand` 参数，表示在默认参数下从 `test_dataset/rxn0000_all.xyz` 中选择出所有相互之间相似程度低于阈值的点，你可以将你的输出文件与 `tests/test_result/test_1` 中的文件进行对比，二者应该是一致的。
+2. 你可以在命令行中运行 `python fps_cpu_numpy.py --ref tests/test_dataset/rxn000x.xyz --cand test_dataset/rxn000x_all.xyz --r_cut 5 --n_max 3 --l_max 3 --threshold 0.99 &`，表示将 `--cand` 中的点与 `--ref` 中的点比较，逐一挑选最不相似的点加入 `--ref` 中，直到相似度低于阈值的点全部被加入 `--ref` 中。你可以将你的输出文件与 `tests/test_result/test_2` 中的文件进行对比，二者应该是一致的。  
 
 ---
   
