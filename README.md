@@ -1,96 +1,141 @@
-# General reactive machine learning potentials for CHON elements
-Some simple scripts for operating chemical datasets  
+# FPS-SOAP: Farthest Point Sampling with SOAP Descriptors
+
+FPS-SOAP is a set of scripts for efficient chemical dataset curation using **Farthest Point Sampling (FPS)** algorithm combined with **[SOAP (Smooth Overlap of Atomic Positions)](https://singroup.github.io/dscribe/latest/tutorials/descriptors/soap.html#)** descriptors. The tool helps identify structurally dissimilar compounds by calculating similarity scores between molecular geometries, enabling dataset pruning or expansion for machine learning applications in chemistry.
+
+
+## 📄 Project Paper
+[General reactive machine learning potentials for CHON elements](https://faculty.ecnu.edu.cn/_s34/zt2/main.psp) <!-- 请在此处添加项目相关论文链接 -->
+
+
+## 🚀 Environment Setup
+### Dependencies
+- Python 3.10.17  
+- PyTorch 2.7.0 (CUDA 12.8)  
+- NumPy 2.1.2  
+- scikit-learn 1.6.1  <!-- 需要检查是否需要安装 sklearn -->  
+- ASE 3.25.0  
+- Dscribe 2.1.1  
+
+
+### Installation
+#### Using Conda
+```bash
+# Create environment from requirements.txt
+conda create --name fps-soap --file requirements.txt
+
+# Activate the environment
+conda activate fps-soap
+```
+#### Using pip
+```bash
+# Install dependencies
+pip install -r requirements.txt
+```
+
+
+## 📜 Script Documentation
+
+### 1. CPU Version: `fps_cpu_numpy.py`
+#### Purpose
+Optimized CPU implementation for FPS-based structure similarity sampling using NumPy. Uses **[Laplacian kernel](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.laplacian_kernel.html) (accelerated by Numba JIT)** for atomic similarity calculation and **[AverageKernel](https://singroup.github.io/dscribe/latest/doc/dscribe.kernels.html#dscribe.kernels.averagekernel.AverageKernel)** for molecular similarity aggregation.
+
+#### Key Parameters
+| Parameter       | Type         | Default       | Description                                                                 |
+|-----------------|--------------|---------------|-----------------------------------------------------------------------------|
+| `--ref`         | str          | `""`          | Path to reference XYZ file (optional)                       |
+| `--cand`        | str          | required      | Path to candidate XYZ file (must be provided)                               |
+| `--n_jobs`      | int          | `None`        | Number of CPU cores for parallel processing (`None` = all available cores)  |
+| `--batch_size`  | int          | 50            | Batch size for CPU parallel processing                                     |
+| `--r_cut`       | float        | 10.0          | Cutoff radius for SOAP descriptor (unit: Å)                                 |
+| `--n_max`       | int          | 6             | Number of radial basis functions for SOAP descriptor                       |
+| `--l_max`       | int          | 4             | Maximum degree of spherical harmonics for SOAP descriptor                   |
+| `--threshold`   | float        | 0.9           | Similarity threshold (0-1, structures above this threshold are retained)   |
+| `--save_soap`   | bool         | `False`       | Save calculated SOAP descriptors or not |
+| `--save_dir`    | str          | `fps_results` | Directory to save output results (default: creates `fps_results/[timestamp]/formula` folders)    |
+
+#### Features
+- Automatically initializes reference set with first candidate structure if `--ref` is empty
+- Parallelizes across CPU cores for similarity calculation
+- Creates timestamped output folders for reproducibility  
+
+### 2. GPU Version: `fps_gpu_torch.py`
+#### Purpose
+GPU-accelerated version using PyTorch for FPS-based structure similarity sampling. 
+<!-- 
+#### Key Parameters  
+| Parameter       | Description                                                                 |
+|-----------------|-----------------------------------------------------------------------------|
+| `--gpu`         | GPU device index (0 or 1, default: 0)                                      |
+| `--batch_size`  | Batch size for GPU inference (default: 50)                                 |
+| `--njobs`       | CPU cores for preprocessing (default: 1)                                   |
+| *Other params*  | Same as CPU version (see above)                                            |
+
+#### Usage Example
+```bash
+python fps_gpu_torch.py \
+  --cand large_dataset.xyz \
+  --gpu 0 \
+  --batch_size 100 \
+  --threshold 0.9
+```
+
+#### Notes
+- Single-GPU only support (multi-GPU coming soon)
+- Avoid using `--njobs > 1` to prevent memory leaks
+- For CPU-only run, set `--gpu -1` -->
+
+
+## 🧪 Testing
+### Test Command (CPU)
+```bash
+python fps_cpu_numpy.py \
+  --cand tests/test_dataset/rxn000x_all.xyz \
+  --save_dir tests/test_result/ \
+  --threshold 0.99 
+```
+
+**Expected Output**:  
+- Matching output files in `tests/test_result/` (compare with baseline)
+- 8-core CPU runtime: ~10 seconds
+
+<!-- ### Test Command (GPU)
+<<<bash
+python fps_gpu_torch.py \
+  --cand tests/test_dataset/rxn000x_all.xyz \
+  --gpu 0 \
+  --threshold 0.99
+<<<
+
+**Expected Output**:  
+- Same structure selection as CPU version
+- GPU runtime: ~3-5 seconds (NVIDIA RTX 3090) -->
+
+
+## 📁 Result Structure
+Default outputs are saved in:  
+```
+fps_results/
+└── YYYY-MM-DD-HH-MM-SS/
+    └── total_output.log                              # Total Log file
+    └── Formula/
+        ├── updated_ref_structures_Formula.xyz        # Filtered XYZ file
+        ├── updated_ref_soap_descriptors_Formula.h5   # (Optional) Saved SOAP descriptors
+        └── Formula_output.log                        # Log file
+```
+
+
+## 📝 Citation
+If you use this tool in your research, please cite:  
+```bibtex
+@article{YourPaper2025,
+  title={General reactive machine learning potentials for CHON elements},
+  author={Bowen Li},
+  journal={Nature Computational Science},
+  year={2025},
+  doi={10.XXXX/XXXX}
+}
+```
 
 ---
 
-## 1. select_differect_chemical_structures_gpu.py  
-- 脚本简介  
-该脚本可以从一个数据集中根据几何坐标挑选出相似度低于给定阈值的所有结构，从而进行数据的精简。
-此处脚本这是在原先并行 CPU 脚本上进行修改，目前支持 单GPU 运行与 单/多CPU 运行，在 GPU 运行速度明显快于原 24核CPU 的速度，单CPU 运行也远快于原脚本，但 多CPU 运行时可能会出现内存泄漏问题。
-
-- 脚本参数  
-&emsp;`--ref`&emsp;&emsp;str，参考XYZ数据路径，默认''，表示没有参考XYZ数据  
-&emsp;`--cand`&emsp;&emsp;str，候选XYZ路径，必须填写  
-&emsp;`--njobs`&emsp;&emsp;int，CPU并行核数，默认 1  
-&emsp;`--gpu`&emsp;&emsp;int，使用的GPU数，默认 1（目前只能是 0 或 1）  
-&emsp;`--batch_size`&emsp;&emsp;int，GPU运行时读取数据的批大小，默认 50  
-&emsp;`--r_cut`&emsp;&emsp;float，SOAP 描述符截断半径参数，默认 10.0  
-&emsp;`--n_max`&emsp;&emsp;int，SOAP 描述符基函数参数，默认 6  
-&emsp;`--l_max`&emsp;&emsp;int，SOAP 描述符球谐函数参数，默认 4  
-&emsp;`--threshold`&emsp;&emsp;float，相似度阈值，用户需要根据数据集本身的性质以及希望筛选掉的结构数量进行调整，默认 0.9  
-
----
-
-## 2. fps_cpu_numpy.py  
-- 脚本简介  
-修改原先 select_differect_chemical_structures_cpu.py 版本，避免的嵌套并行陷阱，仍旧基于 [SOAP](https://singroup.github.io/dscribe/latest/tutorials/descriptors/soap.html#) 描述符 和 [AverageKernel](https://singroup.github.io/dscribe/latest/tutorials/similarity_analysis/kernels.html) 计算判断两个化学结构的相似性，并通过比较 候选XYZ (`--cand`) 与 参考XYZ (`--ref`) 中化学结构的相似性，将 候选XYZ 中的结构逐一加入到 参考XYZ 中，直到相似度低于阈值的点全部被加入 参考XYZ 中为止。这样我们就通过 候选XYZ 更新了 参考XYZ 数据集。
-
-- 脚本参数
-基本同上，修改如下：  
-删除: &emsp;`--gpu`&emsp;  
-修改: &emsp;`--njobs`&emsp; 为 &emsp;`--n_jobs`&emsp;，默认为 None 表示启用所有 cpu;  
-增加: &emsp;`--save_soap`&emsp; 可选保存或不保存计算得到的描述符，实际计算描述符速度很快，但文件较大，因此默认不保存  
-增加: &emsp;`--save_dir`&emsp; 可选保存输出结果的位置，默认创建新文件夹 fps_results，并创建当前任务 yyyy-mm-dd-hh-mm-ss/formula(s) 文件夹保存  
-
-- 简单测试  
-1. 你可以在命令行中运行 `python fps_cpu_numpy.py --cand tests/test_dataset/rxn0000_all.xyz &` 这是最简单的输入，只写入必须的 `--cand` 参数，表示在默认参数下从 `test_dataset/rxn0000_all.xyz` 中选择出所有相互之间相似程度低于阈值的点，你可以将你的输出文件与 `tests/test_result/test_1` 中的文件进行对比，二者应该是一致的。
-2. 你可以在命令行中运行 `python fps_cpu_numpy.py --ref tests/test_dataset/rxn000x.xyz --cand test_dataset/rxn000x_all.xyz --r_cut 5 --n_max 3 --l_max 3 --threshold 0.99 &`，表示将 `--cand` 中的点与 `--ref` 中的点比较，逐一挑选最不相似的点加入 `--ref` 中，直到相似度低于阈值的点全部被加入 `--ref` 中。你可以将你的输出文件与 `tests/test_result/test_2` 中的文件进行对比，二者应该是一致的。  
-
----
-  
-## 3. calculate_atomic_pair_distances.py  
-- 脚本简介  
-计算分子中两两原子对之间的距离。  
-
-- 脚本参数  
-&emsp;`--file`&emsp;&emsp;str，输入文件路径，必须填写，格式为 .xyz  
-&emsp;`--ignore`&emsp;&emsp;str，忽略的元素列表，以逗号分隔（例如，H,O），默认是''  
-&emsp;`--only`&emsp;&emsp;str，计算的元素对列表，以逗号分隔（例如，C-C,O-C），默认是''  
-&emsp;`--output`&emsp;&emsp;str，输出 HDF5 文件名，必须填写  
-
----
-
-## 4. draw_bond_distribution.py
-- 脚本简介  
-绘制分子中两两原子对之间的距离分布图。 
-
-- 脚本参数  
-&emsp;`--files`&emsp;&emsp;list，必须填写，一或多个键长分布文件名的列表  
-&emsp;`--output`&emsp;&emsp;str，必须填写，输出图形的名称  
-&emsp;`--range`&emsp;&emsp;str，默认 '1,5'，以逗号分隔的距离范围（单位：Å），例如 '1,5'  
-
----
-
-## 5. calculate_coulomb_matrices.py  
-- 脚本简介  
-计算分子的库伦矩阵。  
-
-- 脚本参数  
-&emsp;`--file`&emsp;&emsp;str，必须填写，输入的 .xyz 格式文件  
-&emsp;`--output`&emsp;&emsp;str，必须填写，输出的库仑矩阵文件名（HDF5 格式）  
-&emsp;`--n_jobs`&emsp;&emsp;int，默认 1，计算时使用的并行作业数  
-
----
-
-## 6. do_clustering.py   
-- 脚本简介  
-基于库伦矩阵，对分子进行降维聚类。  
-
-- 脚本参数  
-&emsp;`--files`&emsp;&emsp;list，必须填写，文件名列表  
-&emsp;`--tsne`&emsp;&emsp;str，默认 None，自定义 t-SNE 参数（例如，"n_components=2,perplexity=30"）  
-&emsp;`--umap`&emsp;&emsp;str，默认 None，自定义 UMAP 参数（例如，"n_components=2,n_neighbors=10"）  
-
----
-
-## 7. draw_clustering_results.py  
-- 脚本简介  
-绘制分子的降维聚类图。   
-
-- 脚本参数  
-&emsp;`--tsne`&emsp;&emsp;str，与下一参数必须填写一个，t-SNE HDF5 文件路径  
-&emsp;`--umap`&emsp;&emsp;str，与上一参数必须填写一个，UMAP HDF5 文件路径  
-&emsp;`--labels`&emsp;&emsp;str，必须填写，标签 HDF5 文件路径  
-
-
-2025年2月12日
+**Last updated**: 2025-06-02

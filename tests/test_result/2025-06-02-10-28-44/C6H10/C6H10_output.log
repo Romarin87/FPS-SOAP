@@ -1,0 +1,238 @@
+2025-06-02 10:28:53,052 - INFO - Log begin
+2025-06-02 10:28:53,052 - INFO - Processing formula: C6H10
+2025-06-02 10:28:53,052 - INFO - n_jobs: 8, batch_size: 50
+2025-06-02 10:28:53,052 - INFO - species: ['H', 'C', 'N', 'O'], r_cut: 10.0, n_max: 6, l_max: 4, threshold: 0.99
+2025-06-02 10:28:53,052 - INFO - Save SOAP descriptors: False
+2025-06-02 10:28:53,052 - INFO - Computing SOAP descriptors...
+2025-06-02 10:28:53,149 - INFO - SOAP descriptors computed in 0.10
+2025-06-02 10:28:53,149 - INFO - SOAP of ref in shape: (0,), SOAP of cand in shape: (748, 16, 1500)
+2025-06-02 10:28:53,149 - INFO - Ref structure is empty, add the first Cand structure to Ref structure
+2025-06-02 10:28:53,173 - INFO - Round 1: Similarity computation and self-similarity completed in 0.02 seconds
+2025-06-02 10:28:53,173 - INFO - max_similarity_values shape: (748,)
+2025-06-02 10:28:53,178 - INFO - Round 1: Cand structures reduced from 748 to 731
+2025-06-02 10:28:53,178 - INFO - Round 1: Added structure with min max similarity 0.60694.
+2025-06-02 10:28:53,178 - INFO - Ref structures: 2, Cand structures: 731
+2025-06-02 10:28:53,178 - INFO - ---------
+2025-06-02 10:28:53,183 - INFO - Round 2: Similarity computation completed in 0.01 seconds
+2025-06-02 10:28:53,188 - INFO - Round 2: Cand structures reduced from 731 to 730
+2025-06-02 10:28:53,188 - INFO - Round 2: Added structure with min max similarity 0.80030.
+2025-06-02 10:28:53,188 - INFO - Ref structures: 3, Cand structures: 730
+2025-06-02 10:28:53,188 - INFO - ---------
+2025-06-02 10:28:53,193 - INFO - Round 3: Similarity computation completed in 0.01 seconds
+2025-06-02 10:28:53,197 - INFO - Round 3: Cand structures reduced from 730 to 729
+2025-06-02 10:28:53,198 - INFO - Round 3: Added structure with min max similarity 0.88500.
+2025-06-02 10:28:53,198 - INFO - Ref structures: 4, Cand structures: 729
+2025-06-02 10:28:53,198 - INFO - ---------
+2025-06-02 10:28:53,203 - INFO - Round 4: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,207 - INFO - Round 4: Cand structures reduced from 729 to 708
+2025-06-02 10:28:53,207 - INFO - Round 4: Added structure with min max similarity 0.88961.
+2025-06-02 10:28:53,207 - INFO - Ref structures: 5, Cand structures: 708
+2025-06-02 10:28:53,207 - INFO - ---------
+2025-06-02 10:28:53,212 - INFO - Round 5: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,216 - INFO - Round 5: Cand structures reduced from 708 to 702
+2025-06-02 10:28:53,216 - INFO - Round 5: Added structure with min max similarity 0.91814.
+2025-06-02 10:28:53,216 - INFO - Ref structures: 6, Cand structures: 702
+2025-06-02 10:28:53,216 - INFO - ---------
+2025-06-02 10:28:53,220 - INFO - Round 6: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,224 - INFO - Round 6: Cand structures reduced from 702 to 665
+2025-06-02 10:28:53,224 - INFO - Round 6: Added structure with min max similarity 0.93748.
+2025-06-02 10:28:53,224 - INFO - Ref structures: 7, Cand structures: 665
+2025-06-02 10:28:53,224 - INFO - ---------
+2025-06-02 10:28:53,229 - INFO - Round 7: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,233 - INFO - Round 7: Cand structures reduced from 665 to 660
+2025-06-02 10:28:53,233 - INFO - Round 7: Added structure with min max similarity 0.94012.
+2025-06-02 10:28:53,233 - INFO - Ref structures: 8, Cand structures: 660
+2025-06-02 10:28:53,233 - INFO - ---------
+2025-06-02 10:28:53,237 - INFO - Round 8: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,241 - INFO - Round 8: Cand structures reduced from 660 to 652
+2025-06-02 10:28:53,241 - INFO - Round 8: Added structure with min max similarity 0.95023.
+2025-06-02 10:28:53,241 - INFO - Ref structures: 9, Cand structures: 652
+2025-06-02 10:28:53,241 - INFO - ---------
+2025-06-02 10:28:53,245 - INFO - Round 9: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,249 - INFO - Round 9: Cand structures reduced from 652 to 648
+2025-06-02 10:28:53,249 - INFO - Round 9: Added structure with min max similarity 0.96092.
+2025-06-02 10:28:53,249 - INFO - Ref structures: 10, Cand structures: 648
+2025-06-02 10:28:53,249 - INFO - ---------
+2025-06-02 10:28:53,254 - INFO - Round 10: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,257 - INFO - Round 10: Cand structures reduced from 648 to 617
+2025-06-02 10:28:53,257 - INFO - Round 10: Added structure with min max similarity 0.96114.
+2025-06-02 10:28:53,257 - INFO - Ref structures: 11, Cand structures: 617
+2025-06-02 10:28:53,257 - INFO - ---------
+2025-06-02 10:28:53,261 - INFO - Round 11: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,265 - INFO - Round 11: Cand structures reduced from 617 to 583
+2025-06-02 10:28:53,265 - INFO - Round 11: Added structure with min max similarity 0.96435.
+2025-06-02 10:28:53,265 - INFO - Ref structures: 12, Cand structures: 583
+2025-06-02 10:28:53,265 - INFO - ---------
+2025-06-02 10:28:53,269 - INFO - Round 12: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,272 - INFO - Round 12: Cand structures reduced from 583 to 580
+2025-06-02 10:28:53,272 - INFO - Round 12: Added structure with min max similarity 0.96668.
+2025-06-02 10:28:53,272 - INFO - Ref structures: 13, Cand structures: 580
+2025-06-02 10:28:53,272 - INFO - ---------
+2025-06-02 10:28:53,276 - INFO - Round 13: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,280 - INFO - Round 13: Cand structures reduced from 580 to 569
+2025-06-02 10:28:53,280 - INFO - Round 13: Added structure with min max similarity 0.96733.
+2025-06-02 10:28:53,280 - INFO - Ref structures: 14, Cand structures: 569
+2025-06-02 10:28:53,280 - INFO - ---------
+2025-06-02 10:28:53,283 - INFO - Round 14: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,287 - INFO - Round 14: Cand structures reduced from 569 to 565
+2025-06-02 10:28:53,287 - INFO - Round 14: Added structure with min max similarity 0.96843.
+2025-06-02 10:28:53,287 - INFO - Ref structures: 15, Cand structures: 565
+2025-06-02 10:28:53,287 - INFO - ---------
+2025-06-02 10:28:53,291 - INFO - Round 15: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,294 - INFO - Round 15: Cand structures reduced from 565 to 553
+2025-06-02 10:28:53,294 - INFO - Round 15: Added structure with min max similarity 0.96892.
+2025-06-02 10:28:53,294 - INFO - Ref structures: 16, Cand structures: 553
+2025-06-02 10:28:53,294 - INFO - ---------
+2025-06-02 10:28:53,298 - INFO - Round 16: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,301 - INFO - Round 16: Cand structures reduced from 553 to 523
+2025-06-02 10:28:53,301 - INFO - Round 16: Added structure with min max similarity 0.97002.
+2025-06-02 10:28:53,301 - INFO - Ref structures: 17, Cand structures: 523
+2025-06-02 10:28:53,301 - INFO - ---------
+2025-06-02 10:28:53,305 - INFO - Round 17: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,307 - INFO - Round 17: Cand structures reduced from 523 to 484
+2025-06-02 10:28:53,307 - INFO - Round 17: Added structure with min max similarity 0.97003.
+2025-06-02 10:28:53,307 - INFO - Ref structures: 18, Cand structures: 484
+2025-06-02 10:28:53,307 - INFO - ---------
+2025-06-02 10:28:53,311 - INFO - Round 18: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,313 - INFO - Round 18: Cand structures reduced from 484 to 433
+2025-06-02 10:28:53,314 - INFO - Round 18: Added structure with min max similarity 0.97032.
+2025-06-02 10:28:53,314 - INFO - Ref structures: 19, Cand structures: 433
+2025-06-02 10:28:53,314 - INFO - ---------
+2025-06-02 10:28:53,316 - INFO - Round 19: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,319 - INFO - Round 19: Cand structures reduced from 433 to 386
+2025-06-02 10:28:53,319 - INFO - Round 19: Added structure with min max similarity 0.97778.
+2025-06-02 10:28:53,319 - INFO - Ref structures: 20, Cand structures: 386
+2025-06-02 10:28:53,319 - INFO - ---------
+2025-06-02 10:28:53,321 - INFO - Round 20: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,324 - INFO - Round 20: Cand structures reduced from 386 to 380
+2025-06-02 10:28:53,324 - INFO - Round 20: Added structure with min max similarity 0.97784.
+2025-06-02 10:28:53,324 - INFO - Ref structures: 21, Cand structures: 380
+2025-06-02 10:28:53,324 - INFO - ---------
+2025-06-02 10:28:53,326 - INFO - Round 21: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,328 - INFO - Round 21: Cand structures reduced from 380 to 351
+2025-06-02 10:28:53,329 - INFO - Round 21: Added structure with min max similarity 0.97995.
+2025-06-02 10:28:53,329 - INFO - Ref structures: 22, Cand structures: 351
+2025-06-02 10:28:53,329 - INFO - ---------
+2025-06-02 10:28:53,331 - INFO - Round 22: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,333 - INFO - Round 22: Cand structures reduced from 351 to 317
+2025-06-02 10:28:53,333 - INFO - Round 22: Added structure with min max similarity 0.98034.
+2025-06-02 10:28:53,333 - INFO - Ref structures: 23, Cand structures: 317
+2025-06-02 10:28:53,333 - INFO - ---------
+2025-06-02 10:28:53,335 - INFO - Round 23: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,337 - INFO - Round 23: Cand structures reduced from 317 to 282
+2025-06-02 10:28:53,337 - INFO - Round 23: Added structure with min max similarity 0.98097.
+2025-06-02 10:28:53,337 - INFO - Ref structures: 24, Cand structures: 282
+2025-06-02 10:28:53,337 - INFO - ---------
+2025-06-02 10:28:53,339 - INFO - Round 24: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,339 - INFO - Round 24: Cand structures reduced from 282 to 277
+2025-06-02 10:28:53,339 - INFO - Round 24: Added structure with min max similarity 0.98140.
+2025-06-02 10:28:53,339 - INFO - Ref structures: 25, Cand structures: 277
+2025-06-02 10:28:53,339 - INFO - ---------
+2025-06-02 10:28:53,341 - INFO - Round 25: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,342 - INFO - Round 25: Cand structures reduced from 277 to 257
+2025-06-02 10:28:53,342 - INFO - Round 25: Added structure with min max similarity 0.98273.
+2025-06-02 10:28:53,342 - INFO - Ref structures: 26, Cand structures: 257
+2025-06-02 10:28:53,342 - INFO - ---------
+2025-06-02 10:28:53,344 - INFO - Round 26: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,344 - INFO - Round 26: Cand structures reduced from 257 to 231
+2025-06-02 10:28:53,344 - INFO - Round 26: Added structure with min max similarity 0.98345.
+2025-06-02 10:28:53,344 - INFO - Ref structures: 27, Cand structures: 231
+2025-06-02 10:28:53,344 - INFO - ---------
+2025-06-02 10:28:53,346 - INFO - Round 27: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,346 - INFO - Round 27: Cand structures reduced from 231 to 199
+2025-06-02 10:28:53,346 - INFO - Round 27: Added structure with min max similarity 0.98354.
+2025-06-02 10:28:53,346 - INFO - Ref structures: 28, Cand structures: 199
+2025-06-02 10:28:53,346 - INFO - ---------
+2025-06-02 10:28:53,348 - INFO - Round 28: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,348 - INFO - Round 28: Cand structures reduced from 199 to 186
+2025-06-02 10:28:53,348 - INFO - Round 28: Added structure with min max similarity 0.98480.
+2025-06-02 10:28:53,348 - INFO - Ref structures: 29, Cand structures: 186
+2025-06-02 10:28:53,348 - INFO - ---------
+2025-06-02 10:28:53,349 - INFO - Round 29: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,350 - INFO - Round 29: Cand structures reduced from 186 to 170
+2025-06-02 10:28:53,350 - INFO - Round 29: Added structure with min max similarity 0.98553.
+2025-06-02 10:28:53,350 - INFO - Ref structures: 30, Cand structures: 170
+2025-06-02 10:28:53,350 - INFO - ---------
+2025-06-02 10:28:53,351 - INFO - Round 30: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,351 - INFO - Round 30: Cand structures reduced from 170 to 165
+2025-06-02 10:28:53,351 - INFO - Round 30: Added structure with min max similarity 0.98615.
+2025-06-02 10:28:53,351 - INFO - Ref structures: 31, Cand structures: 165
+2025-06-02 10:28:53,351 - INFO - ---------
+2025-06-02 10:28:53,352 - INFO - Round 31: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,353 - INFO - Round 31: Cand structures reduced from 165 to 160
+2025-06-02 10:28:53,353 - INFO - Round 31: Added structure with min max similarity 0.98623.
+2025-06-02 10:28:53,353 - INFO - Ref structures: 32, Cand structures: 160
+2025-06-02 10:28:53,353 - INFO - ---------
+2025-06-02 10:28:53,354 - INFO - Round 32: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,354 - INFO - Round 32: Cand structures reduced from 160 to 142
+2025-06-02 10:28:53,354 - INFO - Round 32: Added structure with min max similarity 0.98627.
+2025-06-02 10:28:53,354 - INFO - Ref structures: 33, Cand structures: 142
+2025-06-02 10:28:53,354 - INFO - ---------
+2025-06-02 10:28:53,355 - INFO - Round 33: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,355 - INFO - Round 33: Cand structures reduced from 142 to 138
+2025-06-02 10:28:53,356 - INFO - Round 33: Added structure with min max similarity 0.98671.
+2025-06-02 10:28:53,356 - INFO - Ref structures: 34, Cand structures: 138
+2025-06-02 10:28:53,356 - INFO - ---------
+2025-06-02 10:28:53,356 - INFO - Round 34: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,357 - INFO - Round 34: Cand structures reduced from 138 to 95
+2025-06-02 10:28:53,357 - INFO - Round 34: Added structure with min max similarity 0.98724.
+2025-06-02 10:28:53,357 - INFO - Ref structures: 35, Cand structures: 95
+2025-06-02 10:28:53,357 - INFO - ---------
+2025-06-02 10:28:53,357 - INFO - Round 35: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,357 - INFO - Round 35: Cand structures reduced from 95 to 90
+2025-06-02 10:28:53,358 - INFO - Round 35: Added structure with min max similarity 0.98727.
+2025-06-02 10:28:53,358 - INFO - Ref structures: 36, Cand structures: 90
+2025-06-02 10:28:53,358 - INFO - ---------
+2025-06-02 10:28:53,358 - INFO - Round 36: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,358 - INFO - Round 36: Cand structures reduced from 90 to 76
+2025-06-02 10:28:53,358 - INFO - Round 36: Added structure with min max similarity 0.98774.
+2025-06-02 10:28:53,358 - INFO - Ref structures: 37, Cand structures: 76
+2025-06-02 10:28:53,358 - INFO - ---------
+2025-06-02 10:28:53,359 - INFO - Round 37: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,359 - INFO - Round 37: Cand structures reduced from 76 to 68
+2025-06-02 10:28:53,359 - INFO - Round 37: Added structure with min max similarity 0.98784.
+2025-06-02 10:28:53,359 - INFO - Ref structures: 38, Cand structures: 68
+2025-06-02 10:28:53,359 - INFO - ---------
+2025-06-02 10:28:53,359 - INFO - Round 38: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,360 - INFO - Round 38: Cand structures reduced from 68 to 66
+2025-06-02 10:28:53,360 - INFO - Round 38: Added structure with min max similarity 0.98786.
+2025-06-02 10:28:53,360 - INFO - Ref structures: 39, Cand structures: 66
+2025-06-02 10:28:53,360 - INFO - ---------
+2025-06-02 10:28:53,360 - INFO - Round 39: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,360 - INFO - Round 39: Cand structures reduced from 66 to 18
+2025-06-02 10:28:53,360 - INFO - Round 39: Added structure with min max similarity 0.98813.
+2025-06-02 10:28:53,360 - INFO - Ref structures: 40, Cand structures: 18
+2025-06-02 10:28:53,360 - INFO - ---------
+2025-06-02 10:28:53,360 - INFO - Round 40: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,360 - INFO - Round 40: Cand structures reduced from 18 to 17
+2025-06-02 10:28:53,360 - INFO - Round 40: Added structure with min max similarity 0.98873.
+2025-06-02 10:28:53,360 - INFO - Ref structures: 41, Cand structures: 17
+2025-06-02 10:28:53,360 - INFO - ---------
+2025-06-02 10:28:53,361 - INFO - Round 41: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,361 - INFO - Round 41: Cand structures reduced from 17 to 12
+2025-06-02 10:28:53,361 - INFO - Round 41: Added structure with min max similarity 0.98921.
+2025-06-02 10:28:53,361 - INFO - Ref structures: 42, Cand structures: 12
+2025-06-02 10:28:53,361 - INFO - ---------
+2025-06-02 10:28:53,361 - INFO - Round 42: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,361 - INFO - Round 42: Cand structures reduced from 12 to 10
+2025-06-02 10:28:53,361 - INFO - Round 42: Added structure with min max similarity 0.98960.
+2025-06-02 10:28:53,361 - INFO - Ref structures: 43, Cand structures: 10
+2025-06-02 10:28:53,361 - INFO - ---------
+2025-06-02 10:28:53,361 - INFO - Round 43: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,361 - INFO - Round 43: Cand structures reduced from 10 to 4
+2025-06-02 10:28:53,361 - INFO - Round 43: Added structure with min max similarity 0.98977.
+2025-06-02 10:28:53,361 - INFO - Ref structures: 44, Cand structures: 4
+2025-06-02 10:28:53,361 - INFO - ---------
+2025-06-02 10:28:53,361 - INFO - Round 44: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,361 - INFO - Round 44: Cand structures reduced from 4 to 1
+2025-06-02 10:28:53,361 - INFO - Round 44: Added structure with min max similarity 0.98978.
+2025-06-02 10:28:53,361 - INFO - Ref structures: 45, Cand structures: 1
+2025-06-02 10:28:53,361 - INFO - ---------
+2025-06-02 10:28:53,361 - INFO - Round 45: Similarity computation completed in 0.00 seconds
+2025-06-02 10:28:53,361 - INFO - Round 45: Cand structures reduced from 1 to 0
+2025-06-02 10:28:53,361 - INFO - No structures remaining in candidate list.
+2025-06-02 10:28:53,361 - INFO - Ref structures: 45, Cand structures: 0
+2025-06-02 10:28:53,361 - INFO - ---------
+2025-06-02 10:28:53,364 - INFO - Updated reference structures saved to 'C6H10/updated_ref_structures_C6H10.xyz'
+2025-06-02 10:28:53,364 - INFO - Done! Total time elapsed: 0.31 seconds
+2025-06-02 10:28:53,364 - INFO - Log end

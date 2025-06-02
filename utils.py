@@ -5,7 +5,6 @@ from functools import wraps
 from collections import defaultdict
 import h5py
 import numpy as np
-from dscribe.descriptors import SOAP
 
 def time_logger(func):
     @wraps(func)
@@ -17,40 +16,6 @@ def time_logger(func):
         print(f"Function '{func.__name__}' executed in {duration:.2f} seconds.")
         return result  # 返回函数的结果
     return wrapper
-    
-def compute_soap_descriptors(structures, njobs, species, r_cut, n_max, l_max, logger):
-    """
-    Function: Compute SOAP descriptors for a list of structures
-    Input:
-        SOAP inputs
-        logger: logger object
-    Output:
-        List of SOAP descriptors in numpy.ndarray format
-    """
-    start_time = time.time()
-    soap = SOAP(
-        species=species,
-        r_cut=r_cut,
-        n_max=n_max,
-        l_max=l_max
-    )
-
-    try:
-        soap_descriptors = soap.create(structures, n_jobs=njobs)
-    except IndexError:
-        # 说明 structures 为空
-        soap_descriptors = []
-
-    end_time = time.time()
-    logger.info(f"SOAP descriptors computed in {end_time - start_time:.2f} seconds")
-
-    # 由于此处调用本函数计算时，structures 中的结构默认是化学式相同的，因此返回的是 np.ndarray
-    # 需要返回 list 类型，其中元素为 np.ndarray
-    if type(soap_descriptors) == np.ndarray:
-        return [i for i in soap_descriptors]
-    
-    # 原子数不相同时直接返回 list 即可
-    return soap_descriptors
     
 def save_soap_to_hdf5(soap_dict, hdf5_name):
     """
@@ -91,19 +56,6 @@ def read_soap_from_hdf5(hdf5_name):
             soap_dict[formula].append(soap_descriptors)
 
     return soap_dict
-    
-def defaultdict_profiler(soap_data):
-    """
-    Print the available formulas and the shape of their corresponding SOAP descriptors.
-    """
-    formulas = list(soap_data.keys())
-    print("Available formulas:", formulas)
-
-    # 遍历每个分子式并读取 SOAP 描述符
-    for formula in formulas:
-        soap_descriptors = soap_data[formula][:][0]
-        print(f"Formula: {formula}, Shape of SOAP descriptors: {soap_descriptors.shape}")
-    print("---------")
 
 # 设置总的日志记录
 def setup_total_logging(path):
