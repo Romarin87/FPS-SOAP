@@ -1,0 +1,27 @@
+2025-06-02 10:28:44,931 - INFO - Total Log begin
+2025-06-02 10:28:45,216 - INFO - There are 4 formulas to process.
+2025-06-02 10:28:45,216 - INFO - Species: ['H', 'C', 'N', 'O']
+2025-06-02 10:28:45,216 - INFO - ---------
+2025-06-02 10:28:45,216 - INFO - Processing formula 1/4: C2H3N3O
+2025-06-02 10:28:45,216 - INFO - Start Ref structures: 0, Cand structures: 2636
+2025-06-02 10:28:47,741 - INFO - End Ref structures: 173
+2025-06-02 10:28:47,741 - INFO - Done! Total time elapsed: 2.52 seconds
+2025-06-02 10:28:47,741 - INFO - ---------
+2025-06-02 10:28:47,741 - INFO - Processing formula 2/4: C3H8O2
+2025-06-02 10:28:47,741 - INFO - Start Ref structures: 0, Cand structures: 4098
+2025-06-02 10:28:52,958 - INFO - End Ref structures: 289
+2025-06-02 10:28:52,958 - INFO - Done! Total time elapsed: 5.22 seconds
+2025-06-02 10:28:52,958 - INFO - ---------
+2025-06-02 10:28:52,958 - INFO - Processing formula 3/4: CHN3O
+2025-06-02 10:28:52,958 - INFO - Start Ref structures: 0, Cand structures: 586
+2025-06-02 10:28:53,052 - INFO - End Ref structures: 43
+2025-06-02 10:28:53,052 - INFO - Done! Total time elapsed: 0.09 seconds
+2025-06-02 10:28:53,052 - INFO - ---------
+2025-06-02 10:28:53,052 - INFO - Processing formula 4/4: C6H10
+2025-06-02 10:28:53,052 - INFO - Start Ref structures: 0, Cand structures: 748
+2025-06-02 10:28:53,364 - INFO - End Ref structures: 45
+2025-06-02 10:28:53,364 - INFO - Done! Total time elapsed: 0.31 seconds
+2025-06-02 10:28:53,364 - INFO - ---------
+2025-06-02 10:28:53,364 - INFO - All reactions processed successfully!
+2025-06-02 10:28:53,364 - INFO - Total processing time: 8.43 seconds
+2025-06-02 10:28:53,364 - INFO - Total Log end
