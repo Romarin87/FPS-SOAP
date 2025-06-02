@@ -1,6 +1,6 @@
 # FPS-SOAP: Farthest Point Sampling with SOAP Descriptors
 
-FPS-SOAP is a set of scripts for efficient chemical dataset curation using **Farthest Point Sampling (FPS)** algorithm combined with **[SOAP (Smooth Overlap of Atomic Positions)](https://singroup.github.io/dscribe/latest/tutorials/descriptors/soap.html#)** descriptors. The tool helps identify structurally dissimilar compounds by calculating similarity scores between molecular geometries, enabling dataset pruning or expansion for machine learning applications in chemistry.
+FPS-SOAP is a set of scripts for efficient chemical dataset curation using **Farthest Point Sampling (FPS)** algorithm combined with **[Smooth Overlap of Atomic Positions (SOAP)](https://singroup.github.io/dscribe/latest/tutorials/descriptors/soap.html#)** descriptors. The tool helps identify structurally dissimilar compounds by calculating similarity scores between molecular geometries, enabling dataset pruning or expansion for machine learning applications in chemistry.
 
 
 ## 📄 Project Paper
@@ -50,7 +50,7 @@ Optimized CPU implementation for FPS-based structure similarity sampling using N
 | `--n_max`           | int          | 6             | Number of radial basis functions for SOAP descriptor                      |
 | `--l_max`           | int          | 4             | Maximum degree of spherical harmonics for SOAP descriptor                 |
 | `--threshold`       | float        | 0.9           | Similarity threshold (0-1, structures above this threshold are retained)  |
-| `--max_fps_round`   | int          | `None`        | Maximum number of FPS rounds (`None` = unlimited)                         |
+| `--max_fps_rounds`  | int          | `None`        | Maximum number of FPS rounds (`None` = unlimited)                         |
 | `--save_soap`       | bool         | `False`       | Save calculated SOAP descriptors or not                                   |
 | `--save_dir`        | str          | `fps_results` | Directory to save output results (default: creates `fps_results/[timestamp]/formula` folders) |
 
