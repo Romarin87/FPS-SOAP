@@ -188,14 +188,15 @@ def compute_similarity_numpy(cand_soap, ref_soap=None, gamma=1.0):
     re = AverageLaplacianKernel(gamma=gamma)
     return re.create(cand_soap, ref_soap)
 
-def compare_and_update_structures(ref_structures, cand_structures, n_jobs=None, batch_size=50, species=["H", "C", "O", "N"], r_cut=10.0, n_max=6, l_max=4, threshold=0.9, save_soap=False, logger=None):
+def compare_and_update_structures(ref_structures, cand_structures, n_jobs=None, batch_size=50, species=["H", "C", "O", "N"], r_cut=10.0, n_max=6, l_max=4, 
+                                  threshold=0.9, max_fps_rounds=None, save_soap=False, logger=None):
     round_num = 0
 
     if n_jobs is None:
         n_jobs = psutil.cpu_count(logical=False)
     numba.set_num_threads(n_jobs)
 
-    logger.info(f"n_jobs: {n_jobs}, batch_size: {batch_size}")
+    logger.info(f"n_jobs: {n_jobs}, batch_size: {batch_size}, max_fps_rounds: {max_fps_rounds}")
     logger.info(f"species: {species}, r_cut: {r_cut}, n_max: {n_max}, l_max: {l_max}, threshold: {threshold}")
     logger.info(f"Save SOAP descriptors: {save_soap}")
 
@@ -283,6 +284,8 @@ def compare_and_update_structures(ref_structures, cand_structures, n_jobs=None, 
 
         # If cand_structures is empty, meaning the fps is finished, break the loop
         if new_cand_num == 0:
+            logger.info("No structures remaining in candidate list.")
+            logger.info(f"Ref structures: {len(ref_structures)}, Cand structures: {len(cand_structures)}")
             break
         
         # Update the reference structures with the most unsimilar structure from cand_structures
@@ -296,15 +299,18 @@ def compare_and_update_structures(ref_structures, cand_structures, n_jobs=None, 
         logger.info(f"Ref structures: {len(ref_structures)}, Cand structures: {len(cand_structures)}")
         logger.info("---------")
 
-    logger.info("No structures remaining in candidate list.")
-    logger.info(f"Ref structures: {len(ref_structures)}, Cand structures: {len(cand_structures)}")
+        # If reached the maximum rounds, stop the loop
+        if max_fps_rounds is not None and round_num >= max_fps_rounds:
+            logger.info("Maximum FPS rounds reached.")
+            break
+
     logger.info("---------")
 
     return ref_structures, soap_ref
 
 
 # Main function
-def main(ref_file, cand_file, n_jobs, batch_size, r_cut, n_max, l_max, threshold, save_soap, save_dir):
+def main(ref_file, cand_file, n_jobs, batch_size, r_cut, n_max, l_max, threshold, max_fps_rounds, save_soap, save_dir):
     now = datetime.now()
     formatted_time = now.strftime("%Y-%m-%d-%H-%M-%S")
     save_path = os.path.join(save_dir, formatted_time)
@@ -369,6 +375,7 @@ def main(ref_file, cand_file, n_jobs, batch_size, r_cut, n_max, l_max, threshold
                                                                               n_max=n_max,
                                                                               l_max=l_max,
                                                                               threshold=threshold,
+                                                                              max_fps_rounds=max_fps_rounds,
                                                                               save_soap=save_soap,
                                                                               logger=logger)
         
@@ -408,8 +415,9 @@ if __name__ == "__main__":
     parser.add_argument('--n_max', type=int, default=6, help='Number of radial basis functions')
     parser.add_argument('--l_max', type=int, default=4, help='Maximum degree of spherical harmonics')
     parser.add_argument('--threshold', type=float, default=0.9, help='Similarity threshold')
+    parser.add_argument('--max_fps_rounds', type=int, default=None, help='Maximum number of FPS rounds. None for unlimited')
     parser.add_argument('--save_soap', type=bool, default=False, help='Save SOAP descriptor or not. True or False')
     parser.add_argument('--save_dir', type=str, default='fps_results', help='Save directory')
     args = parser.parse_args()
 
-    main(args.ref, args.cand, args.n_jobs, args.batch_size, args.r_cut, args.n_max, args.l_max, args.threshold, args.save_soap, args.save_dir)
+    main(args.ref, args.cand, args.n_jobs, args.batch_size, args.r_cut, args.n_max, args.l_max, args.threshold, args.max_fps_rounds, args.save_soap, args.save_dir)
