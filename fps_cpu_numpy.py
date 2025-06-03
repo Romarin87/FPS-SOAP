@@ -134,11 +134,11 @@ class AverageLaplacianKernel():
         Args:
             x (iterable): A list of local feature arrays for each structure. Each element is an array of shape (n_atoms, n_features).
             y (iterable): An optional second list of features. 
-                        If not specified, y is assumed to be the same as x, and the function computes self-similarity.
+                          If not specified, y is assumed to be the same as x, and the function computes self-similarity.
 
         Returns:
             np.ndarray: An array representing the pairwise global similarity kernel K[i,j] between the given structures. 
-                        Shape: (n_x, n_y)
+                        Shape: (n_x, n_y). If y is None, n_y = 1.
         """
 
         # If y is None, compute self-similarity using x only
@@ -166,7 +166,9 @@ def compute_soap_descriptors(structures, njobs, species, r_cut, n_max, l_max):
     Output:
         List of SOAP descriptors in numpy.ndarray format
     """
-
+    if not structures:
+        return np.array([], dtype=np.float32)
+    
     soap = SOAP(
         species=species,
         r_cut=r_cut,
@@ -174,11 +176,13 @@ def compute_soap_descriptors(structures, njobs, species, r_cut, n_max, l_max):
         l_max=l_max
     )
 
-    if structures:
-        soap_descriptors = soap.create(structures, n_jobs=njobs)
-        return np.array([i for i in soap_descriptors], dtype=np.float32)
-    else:
-        return np.array([], dtype=np.float32)
+    soap_descriptors = soap.create(structures, n_jobs=njobs)
+
+    # For shape compatibility
+    if len(structures) == 1:
+        return np.array([i for i in [soap_descriptors]], dtype=np.float32)
+
+    return np.array([i for i in soap_descriptors], dtype=np.float32)
 
 def compute_similarity_numpy(cand_soap, ref_soap=None, gamma=1.0):
     """
@@ -239,6 +243,10 @@ def compare_and_update_structures(ref_structures, cand_structures, n_jobs=None, 
             re_kernel = np.concatenate(re_kernel_results, axis=0)
             soap_cand_self = np.concatenate(soap_cand_self, axis=0)
             soap_ref_self = np.concatenate(soap_ref_self, axis=0)
+
+            # logger.info(re_kernel.shape)
+            # logger.info(soap_cand_self.shape)
+            # logger.info(soap_ref_self.shape)
 
             # Normalize the similarity matrix
             re_kernel /= np.outer(soap_cand_self, soap_ref_self)
