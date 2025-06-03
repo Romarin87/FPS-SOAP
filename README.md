@@ -1,6 +1,6 @@
 # FPS-SOAP: Farthest Point Sampling with SOAP Descriptors
 
-FPS-SOAP is a set of scripts for efficient chemical dataset curation using **Farthest Point Sampling (FPS)** algorithm combined with **[SOAP (Smooth Overlap of Atomic Positions)](https://singroup.github.io/dscribe/latest/tutorials/descriptors/soap.html#)** descriptors. The tool helps identify structurally dissimilar compounds by calculating similarity scores between molecular geometries, enabling dataset pruning or expansion for machine learning applications in chemistry.
+FPS-SOAP is a set of scripts for efficient chemical dataset curation using **Farthest Point Sampling (FPS)** algorithm combined with **[Smooth Overlap of Atomic Positions (SOAP)](https://singroup.github.io/dscribe/latest/tutorials/descriptors/soap.html#)** descriptors. The tool helps identify structurally dissimilar compounds by calculating similarity scores between molecular geometries, enabling dataset pruning or expansion for machine learning applications in chemistry.
 
 
 ## 📄 Project Paper
@@ -40,18 +40,19 @@ pip install -r requirements.txt
 Optimized CPU implementation for FPS-based structure similarity sampling using NumPy. Uses **[Laplacian kernel](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.pairwise.laplacian_kernel.html) (accelerated by Numba JIT)** for atomic similarity calculation and **[AverageKernel](https://singroup.github.io/dscribe/latest/doc/dscribe.kernels.html#dscribe.kernels.averagekernel.AverageKernel)** for molecular similarity aggregation.
 
 #### Key Parameters
-| Parameter       | Type         | Default       | Description                                                                 |
-|-----------------|--------------|---------------|-----------------------------------------------------------------------------|
-| `--ref`         | str          | `""`          | Path to reference XYZ file (optional)                       |
-| `--cand`        | str          | required      | Path to candidate XYZ file (must be provided)                               |
-| `--n_jobs`      | int          | `None`        | Number of CPU cores for parallel processing (`None` = all available cores)  |
-| `--batch_size`  | int          | 50            | Batch size for CPU parallel processing                                     |
-| `--r_cut`       | float        | 10.0          | Cutoff radius for SOAP descriptor (unit: Å)                                 |
-| `--n_max`       | int          | 6             | Number of radial basis functions for SOAP descriptor                       |
-| `--l_max`       | int          | 4             | Maximum degree of spherical harmonics for SOAP descriptor                   |
-| `--threshold`   | float        | 0.9           | Similarity threshold (0-1, structures above this threshold are retained)   |
-| `--save_soap`   | bool         | `False`       | Save calculated SOAP descriptors or not |
-| `--save_dir`    | str          | `fps_results` | Directory to save output results (default: creates `fps_results/[timestamp]/formula` folders)    |
+| Parameter           | Type         | Default       | Description                                                                 |
+|---------------------|--------------|---------------|-----------------------------------------------------------------------------|
+| `--ref`             | str          | `""`          | Path to reference XYZ file (optional)                                      |
+| `--cand`            | str          | required      | Path to candidate XYZ file (must be provided)                             |
+| `--n_jobs`          | int          | `None`        | Number of CPU cores for parallel processing (`None` = all available cores) |
+| `--batch_size`      | int          | 50            | Batch size for CPU parallel processing                                    |
+| `--r_cut`           | float        | 10.0          | Cutoff radius for SOAP descriptor (unit: Å)                               |
+| `--n_max`           | int          | 6             | Number of radial basis functions for SOAP descriptor                      |
+| `--l_max`           | int          | 4             | Maximum degree of spherical harmonics for SOAP descriptor                 |
+| `--threshold`       | float        | 0.9           | Similarity threshold (0-1, structures above this threshold are retained)  |
+| `--max_fps_rounds`  | int          | `None`        | Maximum number of FPS rounds (`None` = unlimited)                         |
+| `--save_soap`       | bool         | `False`       | Save calculated SOAP descriptors or not                                   |
+| `--save_dir`        | str          | `fps_results` | Directory to save output results (default: creates `fps_results/[timestamp]/formula` folders) |
 
 #### Features
 - Automatically initializes reference set with first candidate structure if `--ref` is empty
