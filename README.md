@@ -50,8 +50,9 @@ Optimized CPU implementation for FPS-based structure similarity sampling using N
 | `--n_max`           | int          | 6             | Number of radial basis functions for SOAP descriptor                      |
 | `--l_max`           | int          | 4             | Maximum degree of spherical harmonics for SOAP descriptor                 |
 | `--threshold`       | float        | 0.9           | Similarity threshold (0-1, structures above this threshold are retained)  |
+| `--dynamic_species` | bool         | `False`       | Use only chemical elements in the current formula (enable with `--dynamic_species`) |
 | `--max_fps_rounds`  | int          | `None`        | Maximum number of FPS rounds (`None` = unlimited)                         |
-| `--save_soap`       | bool         | `False`       | Save calculated SOAP descriptors or not                                   |
+| `--save_soap`       | bool         | `False`       | Save calculated SOAP descriptors to .h5 file (enable with `--save_soap`)   |
 | `--save_dir`        | str          | `fps_results` | Directory to save output results (default: creates `fps_results/[timestamp]/formula` folders) |
 
 #### Features
@@ -139,4 +140,4 @@ If you use this tool in your research, please cite:
 
 ---
 
-**Last updated**: 2025-06-02
+**Last updated**: 2025-06-04
