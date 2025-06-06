@@ -68,10 +68,12 @@ class AverageLaplacianKernel():
     def __init__(self, gamma):
         """
         Args:
-            metric (str): The pairwise metric used for calculating the local similarity, only "laplacian" is supported now.
             gamma (float): Gamma parameter for Laplacian kernel. Use sklearn's default gamma.
         """
         self.gamma = gamma
+        # self.atomic_kernel = laplacian kernel
+        # self.global_kernel = average kernel
+        # TODO: Enable different metrics here
 
     def get_pairwise_matrix(self, X, Y=None):
         """
@@ -157,6 +159,7 @@ class AverageLaplacianKernel():
 
         return K_ij
 
+# TODO: Enable different atomic descriptors here
 def compute_soap_descriptors(structures, njobs, species, r_cut, n_max, l_max):
     """
     Function: Compute SOAP descriptors for a list of structures
@@ -244,10 +247,6 @@ def compare_and_update_structures(ref_structures, cand_structures, n_jobs=None, 
             soap_cand_self = np.concatenate(soap_cand_self, axis=0)
             soap_ref_self = np.concatenate(soap_ref_self, axis=0)
 
-            # logger.info(re_kernel.shape)
-            # logger.info(soap_cand_self.shape)
-            # logger.info(soap_ref_self.shape)
-
             # Normalize the similarity matrix
             re_kernel /= np.outer(soap_cand_self, soap_ref_self)
 
@@ -261,7 +260,6 @@ def compare_and_update_structures(ref_structures, cand_structures, n_jobs=None, 
             # Key bottleneck of calculation
             # Numba optimization, support multi-core CPU parallel computation
             start_time = time.time()
-            batch_size = 50
             re_kernel_results = [compute_similarity_numpy(soap_cand[i:i+batch_size], soap_ref[-1:], gamma=gamma)
                 for i in range(0, len(soap_cand), batch_size)]
             end_time = time.time()
@@ -324,7 +322,8 @@ def main(ref_file, cand_file, n_jobs, batch_size, r_cut, n_max, l_max, threshold
     save_path = os.path.join(save_dir, formatted_time)
 
     total_logger = setup_total_logging(save_path)
-    total_logger.info('Total Log begin')
+    total_logger.info("Total Log begin")
+    total_logger.info("CPU Version 20250606")
     start_time = time.time()
 
     # Reading xyz files
@@ -374,7 +373,8 @@ def main(ref_file, cand_file, n_jobs, batch_size, r_cut, n_max, l_max, threshold
         logger = setup_logging(formula, save_path)
         formula_path = os.path.join(save_path, formula)
         formula_start_time = time.time()
-        logger.info('Log begin')
+        logger.info("Log begin")
+        logger.info("CPU Version 20250606")
         logger.info(f"Processing formula: {formula}")
 
         # Only use the chemical elements contained in the current chemical formula

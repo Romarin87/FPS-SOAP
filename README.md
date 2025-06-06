@@ -9,29 +9,23 @@ FPS-SOAP is a set of scripts for efficient chemical dataset curation using **Far
 
 ## 🚀 Environment Setup
 ### Dependencies
-- Python 3.10.17  
-- PyTorch 2.7.0 (CUDA 12.8)  
-- NumPy 2.1.2  
-- scikit-learn 1.6.1  <!-- 需要检查是否需要安装 sklearn -->  
-- ASE 3.25.0  
+- Python 3.10.18  
 - Dscribe 2.1.1  
-
+- ASE 3.25.0
+- Numpy 2.2.6  (CPU version)
+- PyTorch 2.7.1 (GPU version)  
 
 ### Installation
-#### Using Conda
 ```bash
-# Create environment from requirements.txt
+# Create environment from requirements.txt (only support CPU version)
 conda create --name fps-soap --file requirements.txt
 
 # Activate the environment
 conda activate fps-soap
-```
-#### Using pip
-```bash
-# Install dependencies
-pip install -r requirements.txt
-```
 
+# Install PyTorch (if GPU version is required)
+pip install torch==2.7.1+cu118 torchvision==0.22.1+cu118 torchaudio==2.7.1+cu118 --index-url https://download.pytorch.org/whl/cu118
+```
 
 ## 📜 Script Documentation
 
@@ -49,20 +43,25 @@ Optimized CPU implementation for FPS-based structure similarity sampling using N
 | `--r_cut`           | float        | 10.0          | Cutoff radius for SOAP descriptor (unit: Å)                               |
 | `--n_max`           | int          | 6             | Number of radial basis functions for SOAP descriptor                      |
 | `--l_max`           | int          | 4             | Maximum degree of spherical harmonics for SOAP descriptor                 |
-| `--threshold`       | float        | 0.9           | Similarity threshold (0-1, structures above this threshold are retained)  |
+| `--threshold`       | float        | 0.9           | Similarity threshold (0-1, structures above this threshold are masked)  |
 | `--dynamic_species` | bool         | `False`       | Use only chemical elements in the current formula (enable with `--dynamic_species`) |
 | `--max_fps_rounds`  | int          | `None`        | Maximum number of FPS rounds (`None` = unlimited)                         |
 | `--save_soap`       | bool         | `False`       | Save calculated SOAP descriptors to .h5 file (enable with `--save_soap`)   |
 | `--save_dir`        | str          | `fps_results` | Directory to save output results (default: creates `fps_results/[timestamp]/formula` folders) |
 
 #### Features
+<!-- 此处需要完善 -->
 - Automatically initializes reference set with first candidate structure if `--ref` is empty
-- Parallelizes across CPU cores for similarity calculation
-- Creates timestamped output folders for reproducibility  
+- Parallelizes across CPU cores for similarity calculation using Numba
+- Efficiently handles different sizes of datasets by adjusting `--threshold` and `--max_fps_rounds`
 
-### 2. GPU Version: `fps_gpu_torch.py`
+
+
+### 2. GPU Version: `fps_gpu_torch.py` (in development)
 #### Purpose
-GPU-accelerated version using PyTorch for FPS-based structure similarity sampling. 
+GPU-accelerated version using PyTorch for FPS-based structure similarity sampling.  
+**NOTE: GPU version now is significantly SLOWER than CPU version, not recommended!**
+
 <!-- 
 #### Key Parameters  
 | Parameter       | Description                                                                 |
@@ -129,10 +128,10 @@ fps_results/
 ## 📝 Citation
 If you use this tool in your research, please cite:  
 ```bibtex
-@article{YourPaper2025,
+@article{BowenLi-2025,
   title={General reactive machine learning potentials for CHON elements},
-  author={Bowen Li},
-  journal={Nature Computational Science},
+  author={Bowen Li, Sixuan Mi, Jin Xiao, Shuwen Zhang, Han Wang, Tong Zhu},
+  journal={Nature Computational Science (Ready to submit)},
   year={2025},
   doi={10.XXXX/XXXX}
 }
@@ -140,4 +139,4 @@ If you use this tool in your research, please cite:
 
 ---
 
-**Last updated**: 2025-06-04
+**Last updated**: 2025-06-06

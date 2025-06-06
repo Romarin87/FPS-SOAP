@@ -1,5 +1,6 @@
 import os
 import time
+from datetime import datetime
 import argparse
 from collections import defaultdict
 from itertools import compress
@@ -11,18 +12,17 @@ import torch
 
 from dscribe.descriptors import SOAP
 from joblib import Parallel, delayed
+import psutil
 
 from utils import save_soap_to_hdf5, setup_total_logging, setup_logging
 
-class AverageKernelMultiDevice:
-    def __init__(self, metric, gamma, gpu_id=None):
+class AverageLaplacianKernelGPU():
+    def __init__(self, gamma, gpu_id=None):
         """
         Args:
-            metric (str): The pairwise metric used for calculating the local similarity, only "laplacian" is supported now.
             gamma (float): Gamma parameter for Laplacian kernel. Use sklearn's default gamma.
             gpu_id (int): The GPU device ID to be used for computation.
         """
-        self.metric = metric
         self.gamma = gamma
         self.gpu_id = gpu_id
 
@@ -39,29 +39,28 @@ class AverageKernelMultiDevice:
             torch.Tensor: Tensor (n_x, n_y, n_atoms_x, n_atoms_y) representing the pairwise similarities between X and Y.
                           If Y is None, the returned matrix is of shape (n_x, n_atoms_x, n_atoms_x).
         """
-        device = torch.device(f'cuda:{self.gpu_id}' if (torch.cuda.is_available() and self.gpu_id is not None) else 'cpu')
+        # device = torch.device(f'cuda:{self.gpu_id}' if (torch.cuda.is_available() and self.gpu_id is not None) else 'cpu')
+        device = torch.device(f'cuda:{self.gpu_id}')
         X = X.to(dtype=torch.float32, device=device)  # Shape: (n_x, n_atoms_x, n_features)
 
-        if self.metric == "laplacian":
+        # Normalization
+        if Y is None:
+            Y = X  # Shape: (n_x, n_atoms_x, n_features)
+            diff = torch.abs(X.unsqueeze(2) - Y.unsqueeze(1))  # Shape: (n_x, n_atoms_x, n_atoms_x, n_features)
+            dist = torch.sum(diff, dim=-1)  # Shape: (n_x, n_atoms_x, n_atoms_x)
+            K_ij = torch.exp(-self.gamma * dist) # Shape: (n_x, n_atoms_x, n_atoms_x)
 
-            # Normalization
-            if Y is None:
-                Y = X  # Shape: (n_x, n_atoms_x, n_features)
-                diff = torch.abs(X.unsqueeze(2) - Y.unsqueeze(1))  # Shape: (n_x, n_atoms_x, n_atoms_x, n_features)
-                dist = torch.sum(diff, dim=-1)  # Shape: (n_x, n_atoms_x, n_atoms_x)
-                K_ij = torch.exp(-self.gamma * dist) # Shape: (n_x, n_atoms_x, n_atoms_x)
+        else:
+            Y = Y.to(dtype=torch.float32, device=device) # Shape: (n_y, n_atoms_y, n_features)
 
-            else:
-                Y = Y.to(dtype=torch.float32, device=device) # Shape: (n_y, n_atoms_y, n_features)
+            # Broadcast difference calculation: compute |X_i - Y_j| for all i, j pairs
+            diff = torch.abs(X.unsqueeze(1).unsqueeze(3) - Y.unsqueeze(0).unsqueeze(2))  # Shape: (n_x, n_y, n_atoms_x, n_atoms_y, n_features)
 
-                # Broadcast difference calculation: compute |X_i - Y_j| for all i, j pairs
-                diff = torch.abs(X.unsqueeze(1).unsqueeze(3) - Y.unsqueeze(0).unsqueeze(2))  # Shape: (n_x, n_y, n_atoms_x, n_atoms_y, n_features)
+            # Sum over the atoms dimension (dim=3 for X and dim=4 for Y)
+            dist = torch.sum(diff, dim=-1)  # Shape: (n_x, n_y, n_atoms_x, n_atoms_y)
 
-                # Sum over the atoms dimension (dim=3 for X and dim=4 for Y)
-                dist = torch.sum(diff, dim=-1)  # Shape: (n_x, n_y, n_atoms_x, n_atoms_y)
-
-                # Sum over atoms (2nd and 3rd dims) to get the pairwise kernel value for each pair of molecules
-                K_ij = torch.exp(-self.gamma * dist)  # Shape: (n_x, n_y, n_atoms_x, n_atoms_y)
+            # Sum over atoms (2nd and 3rd dims) to get the pairwise kernel value for each pair of molecules
+            K_ij = torch.exp(-self.gamma * dist)  # Shape: (n_x, n_y, n_atoms_x, n_atoms_y)
 
         return K_ij
 
@@ -76,7 +75,7 @@ class AverageKernelMultiDevice:
             torch.Tensor: Tensor (n_x, n_y) representing the average similarity between the structures.
                           If normalization mode in get_pairwise_matrix(), the shape returned is tensor (n_x).
         """
-        device = torch.device(f'cuda:{self.gpu_id}' if (torch.cuda.is_available() and self.gpu_id is not None) else 'cpu')
+        device = torch.device(f'cuda:{self.gpu_id}')
         localkernel = localkernel.clone().detach().to(dtype=torch.float32, device=device)
         
         # Average similarity across all atoms in both molecules
@@ -118,7 +117,8 @@ class AverageKernelMultiDevice:
 
         return K_ij
 
-def compute_soap_descriptors(structures, njobs, species, r_cut, n_max, l_max, logger):
+# 暂时还是用列表来
+def compute_soap_descriptors(structures, n_jobs, species, r_cut, n_max, l_max):
     """
     Function: Compute SOAP descriptors for a list of structures
     Input:
@@ -127,7 +127,7 @@ def compute_soap_descriptors(structures, njobs, species, r_cut, n_max, l_max, lo
     Output:
         List of SOAP descriptors in numpy.ndarray format
     """
-    start_time = time.time()
+
     soap = SOAP(
         species=species,
         r_cut=r_cut,
@@ -136,13 +136,10 @@ def compute_soap_descriptors(structures, njobs, species, r_cut, n_max, l_max, lo
     )
 
     try:
-        soap_descriptors = soap.create(structures, n_jobs=njobs)
+        soap_descriptors = soap.create(structures, n_jobs=n_jobs)
     except IndexError:
         # 说明 structures 为空
         soap_descriptors = []
-
-    end_time = time.time()
-    logger.info(f"SOAP descriptors computed in {end_time - start_time:.2f} seconds")
 
     # 由于此处调用本函数计算时，structures 中的结构默认是化学式相同的，因此返回的是 np.ndarray
     # 需要返回 list 类型，其中元素为 np.ndarray
@@ -152,20 +149,26 @@ def compute_soap_descriptors(structures, njobs, species, r_cut, n_max, l_max, lo
     # 原子数不相同时直接返回 list 即可
     return soap_descriptors
 
-def compute_similarity_pytorch(cand_soap, ref_soap=None, kernel_metric="laplacian", gpu_id=None):
+def compute_similarity_pytorch(cand_soap, ref_soap=None, gpu_id=None):
     """
     Computes the pairwise similarity between candidate and reference SOAP descriptors using laplacian kernel metric.
     """
     # 以 sci-kit learn 相同的方法计算 gamma 值
     gamma = 1.0 / cand_soap[0].shape[1]
 
-    re = AverageKernelMultiDevice(metric=kernel_metric, gamma=gamma, gpu_id=gpu_id)
+    re = AverageLaplacianKernelGPU(gamma=gamma, gpu_id=gpu_id)
     return re.create(cand_soap, ref_soap)
 
-def compare_and_update_structures(ref_structures, cand_structures, njobs=4, gpu=1, batch_size=50, species=["H", "C", "O", "N"], r_cut=10.0, n_max=6, l_max=4, threshold=0.9, logger=None):
+def compare_and_update_structures(ref_structures, cand_structures, n_jobs=None, gpu=1, batch_size=50, species=["H", "C", "O", "N"], r_cut=10.0, n_max=6, l_max=4, 
+                                  threshold=0.9, max_fps_rounds=None, save_soap=False, logger=None):
     round_num = 0
-    logger.info(f"njobs: {njobs}, gpu: {gpu}, batch_size: {batch_size}")
+
+    if n_jobs is None:
+        n_jobs = psutil.cpu_count(logical=False)
+
+    logger.info(f"n_jobs: {n_jobs}, batch_size: {batch_size}, max_fps_rounds: {max_fps_rounds}")
     logger.info(f"species: {species}, r_cut: {r_cut}, n_max: {n_max}, l_max: {l_max}, threshold: {threshold}")
+    logger.info(f"Save SOAP descriptors: {save_soap}")
 
     while True:
         round_num += 1
@@ -173,9 +176,16 @@ def compare_and_update_structures(ref_structures, cand_structures, njobs=4, gpu=
         # 初次计算
         if round_num == 1:
 
-            # 先计算全部的 SOAP 描述符
-            soap_ref = compute_soap_descriptors(ref_structures, njobs, species, r_cut, n_max, l_max, logger)
-            soap_cand = compute_soap_descriptors(cand_structures, njobs, species, r_cut, n_max, l_max, logger)
+            # Compute SOAP descriptors
+            logger.info("Computing SOAP descriptors...")
+            start_time = time.time()
+            # TODO: soap 返回直接修改为 tensor
+            soap_ref = compute_soap_descriptors(ref_structures, n_jobs, species, r_cut, n_max, l_max)
+            soap_cand = compute_soap_descriptors(cand_structures, n_jobs, species, r_cut, n_max, l_max)
+            end_time = time.time()
+            logger.info(f"SOAP descriptors computed in {end_time - start_time:.2f}")
+            # logger.info(f"SOAP of ref in shape: {soap_ref.shape}, SOAP of cand in shape: {soap_cand.shape}")
+            # TODO: 将这里原生从列表变为 torch 格式
 
             # 如果 soap_ref 为空，则将 soap_cand 的第一个元素添加到 soap_ref 中
             if soap_ref == []:
@@ -183,10 +193,13 @@ def compare_and_update_structures(ref_structures, cand_structures, njobs=4, gpu=
                 soap_ref.append(soap_cand[0])
                 logger.info("Ref structure is empty, add the first Cand structure to Ref structure")
 
-            start_time = time.time()
+            # TODO: 可以尝试在这里传入 gamma 是否会更快    
 
-            # 支持 GPU 计算
             # 目前仅支持单 GPU 计算
+            # TODO: 找个有多张 GPU 的服务器测试一下
+            # 但目前 CPU 从 100k 中选 1 只需要 0.7 秒左右，再大体系用 FPS 可能就够呛了，小体系 GPU 如果真的能加速
+            # 可能数据在 CPU - GPU 上迁移就会成为速度瓶颈，需要进一步考虑
+            start_time = time.time()
             if gpu:
                 # 分 batch_size 批次计算 cand 中每个结构与 ref 中所有结构的相似度
                 re_kernel_results = Parallel(n_jobs=gpu)(
@@ -201,21 +214,8 @@ def compare_and_update_structures(ref_structures, cand_structures, njobs=4, gpu=
                 soap_ref_self = Parallel(n_jobs=gpu)(
                     delayed(compute_similarity_pytorch)(soap_ref[i:i+batch_size], gpu_id=(i//batch_size)%gpu) 
                     for i in range(0, len(soap_ref), batch_size))
-
-            # 支持多核 CPU 并行运算
-            # 但会出现内存泄漏导致效率反而不如单核运算
-            else:
-                re_kernel_results = Parallel(n_jobs=njobs)(
-                    delayed(compute_similarity_pytorch)(soap_cand[i:i+1], soap_ref) 
-                    for i in range(0, len(soap_cand)))
-
-                soap_cand_self = Parallel(n_jobs=njobs)(
-                    delayed(compute_similarity_pytorch)(soap_cand[i:i+1]) 
-                    for i in range(0, len(soap_cand)))
-
-                soap_ref_self = Parallel(n_jobs=njobs)(
-                    delayed(compute_similarity_pytorch)(soap_ref[i:i+1]) 
-                    for i in range(0, len(soap_ref)))
+            end_time = time.time()
+            logger.info(f"Round {round_num}: Similarity computation and self-similarity completed in {end_time - start_time:.2f} seconds")
 
             # 合并批次/并行计算的结果
             re_kernel = torch.cat(re_kernel_results, dim=0)
@@ -228,31 +228,23 @@ def compare_and_update_structures(ref_structures, cand_structures, njobs=4, gpu=
             # 将相似度矩阵移动到 CPU 以避免 I/O 造成的计算速度瓶颈
             re_kernel = re_kernel.cpu()
 
-            end_time = time.time()
-            logger.info(f"Round {round_num}: Similarity computation and self-similarity completed in {end_time - start_time:.2f} seconds")
-
             # 选取 cand_structures 中每个结构与 ref_structures 中所有结构的最大相似度
             max_similarity_values, _ = torch.max(re_kernel, dim=1)
 
         # 非初次计算
         else:
             start_time = time.time()
-
             if gpu:
                 re_kernel_results = Parallel(n_jobs=gpu)(
                     delayed(compute_similarity_pytorch)(soap_cand[i:i+batch_size], [soap_ref[-1]], gpu_id=(i//batch_size)%gpu) 
                     for i in range(0, len(soap_cand), batch_size))
-            else:
-                re_kernel_results = Parallel(n_jobs=njobs)(
-                    delayed(compute_similarity_pytorch)(soap_cand[i:i+1], [soap_ref[-1]]) 
-                    for i in range(0, len(soap_cand)))
-                                
+            end_time = time.time()
+            logger.info(f"Round {round_num}: Similarity computation completed in {end_time - start_time:.2f} seconds")
+
+
             re_kernel = torch.cat(re_kernel_results, dim=0)
             re_kernel /= torch.outer(soap_cand_self, soap_ref_self[-1].unsqueeze(0))
             re_kernel = re_kernel.cpu()
-
-            end_time = time.time()
-            logger.info(f"Round {round_num}: Similarity computation completed in {end_time - start_time:.2f} seconds")
 
             # 将原先 max_similarity_values 与新加入的 ref 计算的 max_similarity_value 合并
             max_similarity_values, _ = torch.max(
@@ -276,6 +268,8 @@ def compare_and_update_structures(ref_structures, cand_structures, njobs=4, gpu=
 
         # 如果 cand_structures 中没有元素，说明筛选完毕，退出循环
         if new_cand_num == 0:
+            logger.info("No structures remaining in candidate list.")
+            logger.info(f"Ref structures: {len(ref_structures)}, Cand structures: {len(cand_structures)}")
             break
         
         # 将 cand_structures 与 ref_structures 中最不相似的结构添加到 ref_structures 中
@@ -290,17 +284,26 @@ def compare_and_update_structures(ref_structures, cand_structures, njobs=4, gpu=
         logger.info(f"Ref structures: {len(ref_structures)}, Cand structures: {len(cand_structures)}")
         logger.info("---------")
 
-    logger.info("No structures remaining in candidate list.")
-    logger.info(f"Ref structures: {len(ref_structures)}, Cand structures: {len(cand_structures)}")
+        # If reached the maximum rounds, stop the loop
+        if max_fps_rounds is not None and round_num >= max_fps_rounds:
+            logger.info("Maximum FPS rounds reached.")
+            break
+
     logger.info("---------")
 
     return ref_structures, soap_ref
 
 
 # 主程序
-def main(ref_file, cand_file, njobs, gpu, batch_size, r_cut, n_max, l_max, threshold):
-    total_logger = setup_total_logging()
-    total_logger.info('Total Log begin')
+def main(ref_file, cand_file, n_jobs, gpu, batch_size, r_cut, n_max, l_max, 
+         threshold, dynamic_species, max_fps_rounds, save_soap, save_dir):
+    now = datetime.now()
+    formatted_time = now.strftime("%Y-%m-%d-%H-%M-%S")
+    save_path = os.path.join(save_dir, formatted_time)
+
+    total_logger = setup_total_logging(save_path)
+    total_logger.info("Total Log begin")
+    total_logger.info("GPU Version 20250606")
     start_time = time.time()
 
     # 读取数据
@@ -325,17 +328,22 @@ def main(ref_file, cand_file, njobs, gpu, batch_size, r_cut, n_max, l_max, thres
     formula_num = len(cand_dict.keys())
     total_logger.info(f"There are {formula_num} formulas to process.")
 
-    # 确认 species 中所含有的元素类型
-    species = set()
+    # Confirming species
+    all_species = set()
     for key in cand_dict:
-        species.update(cand_dict[key][0].get_chemical_symbols())
+        all_species.update(cand_dict[key][0].get_chemical_symbols())
     for key in ref_dict:
         try:
-            species.update(cand_dict[key][0].get_chemical_symbols())
+            all_species.update(cand_dict[key][0].get_chemical_symbols())
         except:
             continue
-    species = list(species)
-    total_logger.info(f"Species: {species}")
+    all_species = list(all_species)
+    total_logger.info(f"All Species: {all_species}, Dynamic Species: {dynamic_species}")
+    
+    total_logger.info(f"n_jobs: {n_jobs}, batch_size: {batch_size}, max_fps_rounds: {max_fps_rounds}")
+    total_logger.info(f"r_cut: {r_cut}, n_max: {n_max}, l_max: {l_max}, threshold: {threshold}")
+    total_logger.info(f"Save SOAP descriptors: {save_soap}")
+    total_logger.info(f"Save directory: {save_dir}")
     total_logger.info("---------")
 
     for i, formula in enumerate(cand_dict.keys()):
@@ -343,16 +351,22 @@ def main(ref_file, cand_file, njobs, gpu, batch_size, r_cut, n_max, l_max, thres
         total_logger.info(f"Processing formula {i+1:>}/{formula_num:>}: {formula}")
         total_logger.info(f"Start Ref structures: {len(ref_dict[formula])}, Cand structures: {len(cand_dict[formula])}")
 
-        logger = setup_logging(formula)  
+        logger = setup_logging(formula, save_path)  
+        formula_path = os.path.join(save_path, formula)
         formula_start_time = time.time()
-        logger.info('Log begin')
+        logger.info("Log begin")
+        logger.info("GPU Version 20250606")
         logger.info(f"Processing formula: {formula}")
 
         # 由于后续相似度是经过正则化到 [0, 1] 的，因此不必对每一个反应自动匹配 species，直接取所有元素的并集即可
-        # species=list(set(cand_dict[formula][0].get_chemical_symbols()))
+        if dynamic_species:
+            species = list(set(cand_dict[formula][0].get_chemical_symbols()))
+        else:
+            species = all_species
+
         updated_structures, updated_soap_list = compare_and_update_structures(ref_dict[formula], 
                                                                               cand_dict[formula], 
-                                                                              njobs=njobs,
+                                                                              n_jobs=n_jobs,
                                                                               gpu=gpu,
                                                                               batch_size=batch_size,                                                                                  
                                                                               species=species,
@@ -360,19 +374,22 @@ def main(ref_file, cand_file, njobs, gpu, batch_size, r_cut, n_max, l_max, thres
                                                                               n_max=n_max,
                                                                               l_max=l_max,
                                                                               threshold=threshold,
+                                                                              max_fps_rounds=max_fps_rounds,
+                                                                              save_soap=save_soap,
                                                                               logger=logger)
         
-        # 逐一保存更新后的参考结构
-        write(os.path.join(formula, f"updated_ref_structures_{formula}.xyz"), updated_structures)
+            # Saving the updated reference structures
+        write(os.path.join(formula_path, f"updated_ref_structures_{formula}.xyz"), updated_structures)
         logger.info(f"Updated reference structures saved to '{formula}/updated_ref_structures_{formula}.xyz'")
         
-        # 保存更新后的结构和 SOAP 到 HDF5
-        soap_dict = defaultdict(list)
-        for i in range(len(updated_soap_list)):
-            soap_result = updated_soap_list[i]
-            soap_dict[formula].append(soap_result)
-        save_soap_to_hdf5(soap_dict, os.path.join(formula, f"updated_ref_soap_descriptors_{formula}.h5"))
-        logger.info(f"SOAP descriptors saved to '{formula}/updated_ref_soap_descriptors_{formula}.h5'")
+        # Saving SOAP descriptors of the updated reference structures, if needed
+        if save_soap:
+            soap_dict = defaultdict(list)
+            for i in range(len(updated_soap_list)):
+                soap_result = updated_soap_list[i]
+                soap_dict[formula].append(soap_result)
+            save_soap_to_hdf5(soap_dict, os.path.join(formula_path, f"updated_ref_soap_descriptors_{formula}.h5"))
+            logger.info(f"SOAP descriptors saved to '{formula}/updated_ref_soap_descriptors_{formula}.h5'")
 
         formula_end_time = time.time()
         logger.info(f"Done! Total time elapsed: {formula_end_time - formula_start_time:.2f} seconds")
@@ -391,14 +408,18 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Select different chemical structures.')
     parser.add_argument('--ref', type=str, default='', help='Reference XYZ file')
     parser.add_argument('--cand', type=str, required=True, help='Candidate XYZ file')
-    parser.add_argument('--njobs', type=int, default=1, help='Number of jobs for CPU parallel processing')
+    parser.add_argument('--n_jobs', type=int, default=None, help='Number of jobs for CPU parallel processing')
     parser.add_argument('--gpu', type=int, default=1, help='Number of GPUs for GPU parallel processing')
     parser.add_argument('--batch_size', type=int, default=50, help='Batch size for GPU parallel processing')
     parser.add_argument('--r_cut', type=float, default=10.0, help='Cutoff radius for soap descriptor')
     parser.add_argument('--n_max', type=int, default=6, help='Number of radial basis functions')
     parser.add_argument('--l_max', type=int, default=4, help='Maximum degree of spherical harmonics')
     parser.add_argument('--threshold', type=float, default=0.9, help='Similarity threshold')
-
+    parser.add_argument('--dynamic_species', action='store_true', help='Only use the chemical elements contained in the current chemical formula or not. True or False')   
+    parser.add_argument('--max_fps_rounds', type=int, default=None, help='Maximum number of FPS rounds. None for unlimited')
+    parser.add_argument('--save_soap', action='store_true', help='Save SOAP descriptor to .h5 file or not. True or False')
+    parser.add_argument('--save_dir', type=str, default='fps_results', help='Save directory')
     args = parser.parse_args()
 
-    main(args.ref, args.cand, args.njobs, args.gpu, args.batch_size, args.r_cut, args.n_max, args.l_max, args.threshold)
+    main(args.ref, args.cand, args.n_jobs, args.gpu, args.batch_size, args.r_cut, args.n_max, args.l_max, 
+         args.threshold, args.dynamic_species, args.max_fps_rounds, args.save_soap, args.save_dir)
