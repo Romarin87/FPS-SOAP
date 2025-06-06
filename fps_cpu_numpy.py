@@ -68,10 +68,12 @@ class AverageLaplacianKernel():
     def __init__(self, gamma):
         """
         Args:
-            metric (str): The pairwise metric used for calculating the local similarity, only "laplacian" is supported now.
             gamma (float): Gamma parameter for Laplacian kernel. Use sklearn's default gamma.
         """
         self.gamma = gamma
+        # self.atomic_kernel = laplacian kernel
+        # self.global_kernel = average kernel
+        # TODO: Enable different metrics here
 
     def get_pairwise_matrix(self, X, Y=None):
         """
@@ -157,6 +159,7 @@ class AverageLaplacianKernel():
 
         return K_ij
 
+# TODO: Enable different atomic descriptors here
 def compute_soap_descriptors(structures, njobs, species, r_cut, n_max, l_max):
     """
     Function: Compute SOAP descriptors for a list of structures
@@ -244,10 +247,6 @@ def compare_and_update_structures(ref_structures, cand_structures, n_jobs=None, 
             soap_cand_self = np.concatenate(soap_cand_self, axis=0)
             soap_ref_self = np.concatenate(soap_ref_self, axis=0)
 
-            # logger.info(re_kernel.shape)
-            # logger.info(soap_cand_self.shape)
-            # logger.info(soap_ref_self.shape)
-
             # Normalize the similarity matrix
             re_kernel /= np.outer(soap_cand_self, soap_ref_self)
 
@@ -261,7 +260,6 @@ def compare_and_update_structures(ref_structures, cand_structures, n_jobs=None, 
             # Key bottleneck of calculation
             # Numba optimization, support multi-core CPU parallel computation
             start_time = time.time()
-            batch_size = 50
             re_kernel_results = [compute_similarity_numpy(soap_cand[i:i+batch_size], soap_ref[-1:], gamma=gamma)
                 for i in range(0, len(soap_cand), batch_size)]
             end_time = time.time()
@@ -318,13 +316,14 @@ def compare_and_update_structures(ref_structures, cand_structures, n_jobs=None, 
 
 
 # Main function
-def main(ref_file, cand_file, n_jobs, batch_size, r_cut, n_max, l_max, threshold, max_fps_rounds, save_soap, save_dir):
+def main(ref_file, cand_file, n_jobs, batch_size, r_cut, n_max, l_max, threshold, dynamic_species, max_fps_rounds, save_soap, save_dir):
     now = datetime.now()
     formatted_time = now.strftime("%Y-%m-%d-%H-%M-%S")
     save_path = os.path.join(save_dir, formatted_time)
 
     total_logger = setup_total_logging(save_path)
-    total_logger.info('Total Log begin')
+    total_logger.info("Total Log begin")
+    total_logger.info("CPU Version 20250606")
     start_time = time.time()
 
     # Reading xyz files
@@ -350,16 +349,21 @@ def main(ref_file, cand_file, n_jobs, batch_size, r_cut, n_max, l_max, threshold
     total_logger.info(f"There are {formula_num} formulas to process.")
 
     # Confirming species
-    species = set()
+    all_species = set()
     for key in cand_dict:
-        species.update(cand_dict[key][0].get_chemical_symbols())
+        all_species.update(cand_dict[key][0].get_chemical_symbols())
     for key in ref_dict:
         try:
-            species.update(cand_dict[key][0].get_chemical_symbols())
+            all_species.update(cand_dict[key][0].get_chemical_symbols())
         except:
             continue
-    species = list(species)
-    total_logger.info(f"Species: {species}")
+    all_species = list(all_species)
+    total_logger.info(f"All Species: {all_species}, Dynamic Species: {dynamic_species}")
+    
+    total_logger.info(f"n_jobs: {n_jobs}, batch_size: {batch_size}, max_fps_rounds: {max_fps_rounds}")
+    total_logger.info(f"r_cut: {r_cut}, n_max: {n_max}, l_max: {l_max}, threshold: {threshold}")
+    total_logger.info(f"Save SOAP descriptors: {save_soap}")
+    total_logger.info(f"Save directory: {save_dir}")
     total_logger.info("---------")
 
     for i, formula in enumerate(cand_dict.keys()):
@@ -369,11 +373,16 @@ def main(ref_file, cand_file, n_jobs, batch_size, r_cut, n_max, l_max, threshold
         logger = setup_logging(formula, save_path)
         formula_path = os.path.join(save_path, formula)
         formula_start_time = time.time()
-        logger.info('Log begin')
+        logger.info("Log begin")
+        logger.info("CPU Version 20250606")
         logger.info(f"Processing formula: {formula}")
 
         # Only use the chemical elements contained in the current chemical formula
-        # species = list(set(cand_dict[formula][0].get_chemical_symbols()))
+        if dynamic_species:
+            species = list(set(cand_dict[formula][0].get_chemical_symbols()))
+        else:
+            species = all_species
+
         updated_structures, updated_soap_list = compare_and_update_structures(ref_dict[formula], 
                                                                               cand_dict[formula], 
                                                                               n_jobs=n_jobs,
@@ -423,9 +432,10 @@ if __name__ == "__main__":
     parser.add_argument('--n_max', type=int, default=6, help='Number of radial basis functions')
     parser.add_argument('--l_max', type=int, default=4, help='Maximum degree of spherical harmonics')
     parser.add_argument('--threshold', type=float, default=0.9, help='Similarity threshold')
+    parser.add_argument('--dynamic_species', action='store_true', help='Only use the chemical elements contained in the current chemical formula or not. True or False')
     parser.add_argument('--max_fps_rounds', type=int, default=None, help='Maximum number of FPS rounds. None for unlimited')
-    parser.add_argument('--save_soap', type=bool, default=False, help='Save SOAP descriptor or not. True or False')
+    parser.add_argument('--save_soap', action='store_true', help='Save SOAP descriptor to .h5 file or not. True or False')
     parser.add_argument('--save_dir', type=str, default='fps_results', help='Save directory')
     args = parser.parse_args()
 
-    main(args.ref, args.cand, args.n_jobs, args.batch_size, args.r_cut, args.n_max, args.l_max, args.threshold, args.max_fps_rounds, args.save_soap, args.save_dir)
+    main(args.ref, args.cand, args.n_jobs, args.batch_size, args.r_cut, args.n_max, args.l_max, args.threshold, args.dynamic_species, args.max_fps_rounds, args.save_soap, args.save_dir)
